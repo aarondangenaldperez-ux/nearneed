@@ -37,7 +37,7 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState("all");
   const [city, setCity] = useState("");
-  const [province, setProvince] = useState("");
+  const [filterProvince, setFilterProvince] = useState("");
   const [discoveryMode, setDiscoveryMode] = useState<"checking" | "demo" | "live" | "error">("checking");
   const [discoveryLoading, setDiscoveryLoading] = useState(true);
   const [liveCategories, setLiveCategories] = useState<DiscoveryCategory[]>([]);
@@ -56,7 +56,7 @@ export default function Home() {
         if (query.trim()) params.set("q", query.trim());
         if (active !== "all") params.set("category", active);
         if (city.trim()) params.set("city", city.trim());
-        if (province.trim()) params.set("province", province.trim());
+        if (filterProvince.trim()) params.set("province", filterProvince.trim());
 
         try {
           const response = await fetch("/api/discover?" + params.toString(), {
@@ -107,7 +107,7 @@ export default function Home() {
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [query, active, city, province]);
+  }, [query, active, city, filterProvince]);
 
   const filtered = useMemo(() => {
     if (discoveryMode === "live") return liveServices;
@@ -161,7 +161,7 @@ export default function Home() {
         <div className="search-bar"><span>⌕</span><input aria-label="Search provider services" maxLength={80} placeholder="Search service titles or descriptions" value={query} onChange={(e) => setQuery(e.target.value)} /><kbd>SEARCH</kbd></div>
         <div className="discovery-location">
           <label>CITY / MUNICIPALITY<input aria-label="Filter by city or municipality" maxLength={100} placeholder="e.g. Quezon City" value={city} onChange={(e) => setCity(e.target.value)} /></label>
-          <label>PROVINCE / REGION<input aria-label="Filter by province or region" maxLength={100} placeholder="e.g. Metro Manila" value={province} onChange={(e) => setProvince(e.target.value)} /></label>
+          <label>PROVINCE / REGION<input aria-label="Filter by province or region" maxLength={100} placeholder="e.g. Metro Manila" value={filterProvince} onChange={(e) => setFilterProvince(e.target.value)} /></label>
         </div>
         <div className="filters" aria-label="Filter service categories">{categoryFilters.map((category) => <button key={category.slug} className={active === category.slug ? "filter active" : "filter"} onClick={() => setActive(category.slug)}>{category.name}</button>)}</div>
         {discoveryMode === "checking" && <p className="discovery-status" role="status">Checking for live provider listings…</p>}
