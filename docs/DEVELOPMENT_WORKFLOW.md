@@ -9,7 +9,7 @@ NearNeed development uses three separate systems with distinct jobs:
 
 1. **This ChatGPT project:** product decisions, code review, requirements, research, and task-by-task coordination.
 2. **The connected GitHub tools:** read repository files, create/update commits, create branches, and open pull requests where permissions allow. Changes written here are saved in GitHub immediately as commits.
-3. **GitHub Actions:** the remote execution environment. Each push to `main` and each pull request runs dependency installation, ESLint, a Next.js production build, and a disposable PostgreSQL migration/RLS check.
+3. **GitHub Actions:** the remote execution environment. Changes to application code, dependencies, database migrations, scripts, or CI configuration on `main` and pull requests run dependency installation, ESLint, a Next.js production build, and disposable PostgreSQL migration/RLS checks. Documentation-only changes do not trigger the full CI job; `workflow_dispatch` remains available for a manual run.
 
 The repository is the durable source of truth. A chat transcript is not a source-control system.
 
