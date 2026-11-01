@@ -45,27 +45,18 @@ export async function GET(request: NextRequest) {
     const categorySlug = cleanSlug(params.get("category"));
 
     const supabase = await createClient();
-    const [categoriesResult, providersResult] = await Promise.all([
-      supabase
-        .from("service_categories")
-        .select("id,name,slug")
-        .eq("is_active", true)
-        .order("name", { ascending: true })
-        .limit(100),
-      supabase
-        .from("provider_profiles")
-        .select("user_id,public_name,business_name")
-        .eq("is_published", true)
-        .order("created_at", { ascending: false })
-        .limit(500),
-    ]);
+    const categoriesResult = await supabase
+      .from("service_categories")
+      .select("id,name,slug")
+      .eq("is_active", true)
+      .order("name", { ascending: true })
+      .limit(100);
 
-    if (categoriesResult.error || providersResult.error) {
+    if (categoriesResult.error) {
       return json({ error: "Discovery is temporarily unavailable." }, 503);
     }
 
     const categories = categoriesResult.data ?? [];
-    const providers = providersResult.data ?? [];
     const category = categorySlug
       ? categories.find((item) => item.slug === categorySlug)
       : undefined;
@@ -76,15 +67,12 @@ export async function GET(request: NextRequest) {
       return json({ source: "live", categories: responseCategories, listings: [], hasMore: false });
     }
 
-    if (providers.length === 0) {
-      return json({ source: "live", categories: responseCategories, listings: [], hasMore: false });
-    }
-
     let servicesQuery = supabase
       .from("provider_services")
-      .select("id,provider_id,category_id,title,description,city,province,service_mode,price_from,pricing_note,created_at")
+      .select("id,provider_id,category_id,title,description,city,province,service_mode,price_from,pricing_note,created_at,provider_profiles!inner(public_name,business_name,is_published),service_categories!inner(name,slug,is_active)")
       .eq("is_active", true)
-      .in("provider_id", providers.map((provider) => provider.user_id))
+      .eq("provider_profiles.is_published", true)
+      .eq("service_categories.is_active", true)
       .order("created_at", { ascending: false })
       .limit(RESULT_LIMIT + 1);
 
@@ -103,33 +91,22 @@ export async function GET(request: NextRequest) {
       return json({ error: "Discovery is temporarily unavailable." }, 503);
     }
 
-    const categoryById = new Map(categories.map((item) => [item.id, item]));
-    const providerById = new Map(providers.map((provider) => [provider.user_id, provider]));
     const rows = servicesResult.data ?? [];
     const hasMore = rows.length > RESULT_LIMIT;
 
-    const listings = rows.slice(0, RESULT_LIMIT).flatMap((service) => {
-      const provider = providerById.get(service.provider_id);
-      const serviceCategory = categoryById.get(service.category_id);
-
-      // Never render a listing unless its public provider and active category
-      // were returned by the corresponding published/active queries.
-      if (!provider || !serviceCategory) return [];
-
-      return [{
-        id: service.id,
-        title: service.title,
-        description: service.description,
-        category: serviceCategory.name,
-        categorySlug: serviceCategory.slug,
-        providerName: provider.business_name || provider.public_name || "Local provider",
-        city: service.city,
-        province: service.province,
-        serviceMode: service.service_mode,
-        priceFrom: service.price_from,
-        pricingNote: service.pricing_note,
-      }];
-    });
+    const listings = rows.slice(0, RESULT_LIMIT).map((service) => ({
+      id: service.id,
+      title: service.title,
+      description: service.description,
+      category: service.service_categories.name,
+      categorySlug: service.service_categories.slug,
+      providerName: service.provider_profiles.business_name || service.provider_profiles.public_name || "Local provider",
+      city: service.city,
+      province: service.province,
+      serviceMode: service.service_mode,
+      priceFrom: service.price_from,
+      pricingNote: service.pricing_note,
+    }));
 
     return json({
       source: "live",
