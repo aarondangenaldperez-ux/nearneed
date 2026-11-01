@@ -15,16 +15,16 @@
 
 ## 2. Implemented but awaiting verification
 
-- [ ] Supabase migration syntax corrections. The repository migration previously contained malformed dollar-quote delimiters and a dangling comma; these have been corrected in the current source.
-- [ ] PostgreSQL CI test using a disposable Postgres 16 service, a minimal Auth schema stub, and RLS/trigger assertions.
+- [x] Supabase migration syntax corrections. Malformed dollar-quote delimiters and a dangling comma were fixed and the migration applied successfully in disposable PostgreSQL.
+- [x] PostgreSQL CI test using a disposable Postgres 16 service, a minimal Auth schema stub, and RLS/trigger assertions.
 - [ ] Supabase server/client integration and all database operations against a real configured project.
 - [ ] Customer/provider RLS behaviour using distinct real test users.
 - [ ] Auth registration, confirmation, sign-in, sign-out, and invite gate in a real Supabase project.
 
 ## 3. Currently being developed
 
-- [ ] Make CI test database schema and critical security objects, not just frontend compilation.
-- [ ] Establish reproducible database test coverage and persist the last passing commit/run in this file after verification.
+- [x] CI now tests database schema and critical security objects, not just frontend compilation.
+- [x] Established the first repeatable database migration gate and recorded its successful run.
 
 ## 4. Not yet started
 
@@ -49,6 +49,6 @@ The current homepage search uses example data. The homepage request form only pr
 
 ## Latest execution record
 
-- Earlier verified run: GitHub Actions run 53, commit `ec093c252d6e7890e1734c45c8de67058f036637` — install, lint, and Next.js build succeeded.
-- The database-migration CI gate was added after that run and needs a fresh successful result.
+- GitHub Actions run 60, commit `a429cccfd6be6b9d0a4e26c40974762ab65266da` — install, ESLint, Next.js production build, PostgreSQL migration, RLS count, policy count, and critical trigger checks all succeeded.
+- Result URL: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41287894781
 - Update this section after inspecting the workflow run associated with the latest commit.
