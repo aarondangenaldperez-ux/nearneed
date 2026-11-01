@@ -94,19 +94,28 @@ export async function GET(request: NextRequest) {
     const rows = servicesResult.data ?? [];
     const hasMore = rows.length > RESULT_LIMIT;
 
-    const listings = rows.slice(0, RESULT_LIMIT).map((service) => ({
-      id: service.id,
-      title: service.title,
-      description: service.description,
-      category: service.service_categories.name,
-      categorySlug: service.service_categories.slug,
-      providerName: service.provider_profiles.business_name || service.provider_profiles.public_name || "Local provider",
-      city: service.city,
-      province: service.province,
-      serviceMode: service.service_mode,
-      priceFrom: service.price_from,
-      pricingNote: service.pricing_note,
-    }));
+    const listings = rows.slice(0, RESULT_LIMIT).flatMap((service) => {
+      const serviceCategory = service.service_categories[0];
+      const provider = service.provider_profiles[0];
+
+      // Inner joins should supply both records; keep the response defensive
+      // if schema metadata or row-level policies ever produce an empty embed.
+      if (!serviceCategory || !provider) return [];
+
+      return [{
+        id: service.id,
+        title: service.title,
+        description: service.description,
+        category: serviceCategory.name,
+        categorySlug: serviceCategory.slug,
+        providerName: provider.business_name || provider.public_name || "Local provider",
+        city: service.city,
+        province: service.province,
+        serviceMode: service.service_mode,
+        priceFrom: service.price_from,
+        pricingNote: service.pricing_note,
+      }];
+    });
 
     return json({
       source: "live",
