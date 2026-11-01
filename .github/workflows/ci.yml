@@ -3,8 +3,41 @@ name: CI
 on:
   push:
     branches: [main]
+    paths:
+      - ".github/workflows/**"
+      - "app/**"
+      - "lib/**"
+      - "public/**"
+      - "supabase/**"
+      - "scripts/**"
+      - "package.json"
+      - "package-lock.json"
+      - "npm-shrinkwrap.json"
+      - "tsconfig.json"
+      - "next.config.*"
+      - "postcss.config.mjs"
+      - "eslint.config.mjs"
+      - "middleware.ts"
+      - "proxy.ts"
   pull_request:
     branches: [main]
+    paths:
+      - ".github/workflows/**"
+      - "app/**"
+      - "lib/**"
+      - "public/**"
+      - "supabase/**"
+      - "scripts/**"
+      - "package.json"
+      - "package-lock.json"
+      - "npm-shrinkwrap.json"
+      - "tsconfig.json"
+      - "next.config.*"
+      - "postcss.config.mjs"
+      - "eslint.config.mjs"
+      - "middleware.ts"
+      - "proxy.ts"
+  workflow_dispatch:
 
 permissions:
   contents: read
