@@ -12,17 +12,16 @@ The repository contains:
 - a responsive homepage with example service categories and a clearly labelled, local-only request preview;
 - Supabase SSR authentication scaffolding (email/password sign-in, invite-gated registration, email confirmation, and session refresh);
 - a customer/provider dashboard with request creation, provider profiles, service listings, offers, and offer decisions;
-- a starter PostgreSQL schema with Row Level Security (RLS) policies for seven application tables;
-- a product strategy, competitor scan, pilot requirements, data/security notes, and validation plan;
-- baseline browser security headers and GitHub Actions lint/build workflow.
+- PostgreSQL migrations with Row Level Security policies for seven application tables;
+- a product strategy, competitor scan, pilot requirements, data/security notes, and validation plan.
 
-The live data flows are **not connected or verified yet**. A Supabase project must be created, the migration reviewed/applied, email confirmation configured, and the project URL/publishable key set in local/deployment environment variables. The registration gate remains closed unless a server-only pilot invite code is configured. Do not open registration until privacy notice, terms, reporting, moderation, and support procedures are ready.
+Live data flows are **not connected or verified yet**. A Supabase project must be created, migrations reviewed/applied, email confirmation configured, and project URL/publishable key set in local/deployment environment variables. The registration gate remains closed unless a server-only pilot invite code is configured. Do not open registration until privacy notice, terms, reporting, moderation, and support procedures are ready.
 
-The homepage search still uses example data. Its sample request preview is local-only and does not transmit or save the text. The dashboard uses Supabase server-side operations and database RLS, but it will not work until the backend is configured.
+The homepage search still uses example data. Its request preview is local-only and does not transmit or save the text. The dashboard uses Supabase server-side operations and database RLS, but it will not work until the backend is configured.
 
 ## Strategic focus
 
-Do not launch nationwide or across every service category at once. Philippine competitors already market service catalogues, customer job posts, quote comparison, provider checks, messaging, and booking. NearNeed must validate a specific unmet use case and a focused launch area before expanding.
+Do not launch nationwide or across every service category at once. Validate a specific unmet use case and a focused launch area before expanding.
 
 Read:
 - [Product strategy](docs/PRODUCT_STRATEGY.md)
@@ -44,16 +43,16 @@ npm run dev
 
 Open http://localhost:3000.
 
-GitHub Actions runs dependency installation, lint, a Next.js production build, and a disposable PostgreSQL migration/RLS/trigger check on pushes and pull requests to `main`. Run 74 passed all checks for commit `1adc39de7072d2bd7cfe9d7de9545a125fd7b926` on 1 November 2026, including behaviour tests using separate simulated customer/provider identities. CI checks customer data privacy, provider area/category matching, quote permissions, and offer acceptance rules against disposable PostgreSQL. They do not replace tests against real Supabase Auth sessions or browser end-to-end testing. A committed npm lockfile is still missing.
+GitHub Actions runs dependency installation, lint, a Next.js production build, and PostgreSQL migration/RLS checks on pushes and pull requests to `main`. Run #74 passed all existing checks for commit `1adc39de7072d2bd7cfe9d7de9545a125fd7b926`, including behaviour tests using separate simulated customer/provider identities. A new migration and regression test now restrict customer request status transitions; run #78 is the verification run for that change. CI tests use disposable PostgreSQL and a lightweight Auth stub, not a live Supabase project. A committed npm lockfile is still missing.
 
 ## Supabase setup
 
-1. Create a Supabase project under the responsible adult/project owner.
-2. Review `supabase/migrations/0001_initial_schema.sql` before applying it to a new project.
+1. A responsible adult project owner creates the Supabase project.
+2. Review the SQL migrations before applying them to a new project, in filename order.
 3. Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL` in the local/deployment environment.
-4. Configure the Supabase Auth Site URL and allow-listed redirect URL to include `/auth/confirm`.
+4. Configure Supabase Auth Site URL and allow-listed redirect URL to include `/auth/confirm`.
 5. Test email confirmation, sign-in/out, and RLS with separate customer and provider accounts.
-6. Keep `NEED_PILOT_INVITE_CODE` unset until the pilot is ready. When needed, configure a strong random value as a server-only environment variable; never use a `NEXT_PUBLIC_` prefix for it.
+6. Keep `NEED_PILOT_INVITE_CODE` unset until the pilot is ready. When needed, configure a strong random value as a server-only environment variable; never use a `NEXT_PUBLIC_` prefix.
 7. Never put a Supabase service-role or secret key in browser code or a public repository.
 
 The app uses `@supabase/ssr` cookie-based sessions. On Next.js 16, Supabase session refresh runs in the root `proxy.ts` convention.
@@ -67,4 +66,4 @@ The app uses `@supabase/ssr` cookie-based sessions. On Next.js 16, Supabase sess
 - Do not collect real personal data before accurate privacy terms, retention rules, moderation, support, and incident procedures are ready.
 - The controlled pilot is adult-only. The project owner should manage pilot invitations and obtain appropriate adult oversight for business, contracting, and payment decisions.
 
-This repository is not a legal or security compliance certification. The SQL migration and app integration must be tested against a real Supabase project before use with real people.
+This repository is not a legal or security compliance certification. The SQL migrations and app integration must be tested against a real Supabase project before use with real people.
