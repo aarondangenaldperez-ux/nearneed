@@ -1,5 +1,6 @@
 "use server";
 
+import { timingSafeEqual } from "node:crypto";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -35,7 +36,7 @@ export async function signUp(formData: FormData) {
     expectedCode &&
     inviteBytes.length > 0 &&
     inviteBytes.length === expectedBytes.length &&
-    require("node:crypto").timingSafeEqual(inviteBytes, expectedBytes)
+    timingSafeEqual(inviteBytes, expectedBytes)
   );
 
   if (displayName.length < 2 || !emailLooksValid(email) || password.length < 10 || !validInvite) {
