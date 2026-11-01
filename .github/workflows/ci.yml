@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: nearneed-ci-${github.ref}
+  group: nearneed-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
