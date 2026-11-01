@@ -87,7 +87,7 @@ The moderator interface is not part of the current frontend prototype. Do not la
 - The form clearly states not to include exact street addresses, phone numbers, government IDs, or payment details.
 - Public visitors cannot read private request data.
 - Only the request owner can edit or close a request.
-- Published providers can read only open requests permitted by the pilot rules.
+- Published providers can read only open requests matching an active service's city, province, and category (or an uncategorized request) in the pilot rules.
 - A request cannot be submitted twice by an accidental double click.
 
 ### Offers
@@ -96,7 +96,7 @@ The moderator interface is not part of the current frontend prototype. Do not la
 - Providers cannot submit an offer to their own request.
 - Customers can read only offers attached to their own requests.
 - Providers can read only their own offers and the relevant request.
-- A customer can accept at most one offer per request.
+- A customer can accept at most one offer per request. Acceptance changes the request to matched and closes other outstanding offers.
 - An accepted offer cannot be silently changed by the provider.
 
 ### Provider profiles
