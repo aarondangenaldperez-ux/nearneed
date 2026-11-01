@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { addProviderService, closeRequest, createRequest, decideQuote, saveProviderProfile, signOut, submitQuote } from "@/app/auth/actions";
+import { addProviderService, closeRequest, createRequest, decideQuote, saveProviderProfile, setProviderServiceStatus, signOut, submitQuote } from "@/app/auth/actions";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
@@ -17,6 +17,7 @@ const notices: Record<string, string> = {
   "quote-sent": "Your offer was sent.",
   "offer-updated": "The offer decision was saved.",
   "request-closed": "Your request was closed.",
+  "service-status-updated": "Your service listing status was updated.",
 };
 
 const errors: Record<string, string> = {
@@ -26,6 +27,7 @@ const errors: Record<string, string> = {
   "provider-profile-failed": "We couldn't save the provider profile.",
   "invalid-service": "Check the service details and category.",
   "service-failed": "We couldn't publish the service. Save your provider profile first.",
+  "service-status-failed": "We couldn't change that listing. Refresh and try again.",
   "invalid-quote": "Check the offer message, amount, and estimated days.",
   "quote-failed": "We couldn't send that offer. You may have already sent one, or this request may no longer be open.",
   "invalid-decision": "That offer decision is invalid.",
@@ -172,7 +174,7 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
 
           {providerProfile?.is_published && <div className="provider-services">
             <h3>Your service listings</h3>
-            {providerServices.length > 0 ? <ul className="simple-list">{providerServices.map((service) => <li key={service.id}><span>{service.title} · {service.city}, {service.province}<small>{service.price_from === null ? "Price on request" : "From " + money(service.price_from)}{service.pricing_note ? " · " + service.pricing_note : ""}</small></span><small>{service.is_active ? "Active" : "Paused"}</small></li>)}</ul> : <p className="empty-dashboard">No service listings yet.</p>}
+            {providerServices.length > 0 ? <ul className="simple-list">{providerServices.map((service) => <li key={service.id}><span>{service.title} · {service.city}, {service.province}<small>{service.price_from === null ? "Price on request" : "From " + money(service.price_from)}{service.pricing_note ? " · " + service.pricing_note : ""}</small></span><form action={setProviderServiceStatus}><input type="hidden" name="serviceId" value={service.id} /><input type="hidden" name="status" value={service.is_active ? "paused" : "active"} /><button className="small-button secondary" type="submit">{service.is_active ? "Pause" : "Reactivate"}</button></form></li>)}</ul> : <p className="empty-dashboard">No service listings yet.</p>}
             <form action={addProviderService} className="dashboard-form">
               <h3>Add a service</h3>
               <label htmlFor="service-title">Service title</label><input id="service-title" name="serviceTitle" minLength={4} maxLength={100} required />
