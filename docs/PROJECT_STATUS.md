@@ -2,7 +2,7 @@
 
 **Last reviewed:** 1 November 2026  
 **Source of truth:** GitHub `main` and the latest applicable GitHub Actions run  
-**Latest implementation commit:** `1c5383a2e70421e1fc040ffd24f3ff30bc54d273`  
+**Latest implementation commit:** `216afab454d174c7ac74cb84a30e683ac29f11ad`  
 **Product state:** MVP engineering foundation; not production-ready
 
 ## 1. Completed and verified
@@ -19,7 +19,7 @@
 - [x] CI run **#83** passed the quote-acceptance guard migration, the one-winner regression test, request-status transition tests, existing RLS checks, lint, and the Next.js production build.
 - [x] CI run **#78** passed the request-status guard migration and regression test, along with lint, production build, and existing database authorization checks.
 - [x] Added migration `0003_quote_acceptance_guard.sql` to serialize offer acceptance, require the parent request to remain open, and prevent a second accepted offer; verified in CI run #83.
-- [ ] Implemented a public discovery API and homepage integration for active services from published providers, with active categories, service-title/description search, city/province filters, no-store responses, and a 48-listing cap. Latest homepage/SQL regression CI run #92 is pending.
+- [x] Implemented a public discovery API and homepage integration for active services from published providers, with active categories, service-title/description search, city/province filters, no-store responses, and a 48-listing cap. CI run #94 verified the lint/build and database regression checks, including exclusion of an active service from an unpublished provider.
 
 Verified run #74: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41288976287  
 Verified request-status guard run #78: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41291369075  
@@ -27,7 +27,7 @@ Verified quote-acceptance guard run #83: https://github.com/aarondangenaldperez-
 
 ## 2. Implemented but awaiting verification
 
-- [ ] CI run #92 must pass before the new homepage discovery integration and unpublished-provider regression test are marked verified.
+- [ ] Test the public discovery endpoint against a real configured Supabase project and exercise it in a real browser; disposable PostgreSQL CI does not prove the full Supabase PostgREST relationship response.
 - [ ] Supabase SSR session and database integration against a real configured Supabase project.
 - [ ] Registration, confirmation, sign-in, sign-out, invite gate, and recovery flows using real email delivery.
 - [x] RLS behaviour under separate simulated customer/provider identities is checked against disposable PostgreSQL.
@@ -37,10 +37,10 @@ Verified quote-acceptance guard run #83: https://github.com/aarondangenaldperez-
 
 ## 3. Next engineering priorities
 
-1. Complete CI verification for the live homepage discovery slice, then test the directory against a real configured Supabase project.
-2. Add safe report submission UI and restricted moderation before live user-generated content.
-3. Add rate limits and anti-spam controls to account creation, requests, and offers.
-4. Add a request handoff that carries a selected provider service into the authenticated customer request flow; direct messaging is not yet available.
+1. Test the public discovery endpoint against a real configured Supabase project and exercise it in a real browser.
+2. Add a selected-service request handoff into the authenticated customer request flow; clearly state that the request goes to eligible providers, not as a direct message to the selected provider.
+3. Add safe report submission UI and restricted moderation before live user-generated content.
+4. Add rate limits and anti-spam controls to account creation, requests, and offers.
 5. Add accessibility and browser end-to-end tests for core customer/provider journeys.
 6. Generate and commit a reproducible npm lockfile.
 
@@ -63,6 +63,6 @@ Verified quote-acceptance guard run #83: https://github.com/aarondangenaldperez-
 
 ## Important scope statement
 
-The homepage now has a Supabase-backed public discovery path, but it falls back to clearly labelled sample categories when Supabase is not configured. The live query has not yet been tested against a real Supabase project. The homepage request preview is still local-only and does not save or send content. Dashboard workflows require a configured Supabase project. There is no direct messaging, notification, review, admin, payment, or deployment system.
+The homepage now has a Supabase-backed public discovery path, with a clearly labelled sample-category fallback when Supabase is not configured. Its lint/build and disposable PostgreSQL/RLS regression checks passed CI run #94, but it has not been tested against a real Supabase project. The homepage request preview is still local-only and does not save or send content. Dashboard workflows require a configured Supabase project. There is no direct messaging, notification, review, admin, payment, or deployment system.
 
 A green CI run proves only the checks that actually ran. It does not prove a live production marketplace, real Supabase integration, or end-to-end browser correctness.
