@@ -44,7 +44,7 @@ npm run dev
 
 Open http://localhost:3000.
 
-GitHub Actions runs dependency installation, lint, a Next.js production build, and a disposable PostgreSQL migration/RLS/trigger check on pushes and pull requests to `main`. Run 70 passed all checks for commit `adf2fcf79e08a725de7104a000d50cdcec08aa25` on 1 November 2026, including behaviour tests using separate simulated customer/provider identities. CI checks customer data privacy, provider area/category matching, quote permissions, and offer acceptance rules against disposable PostgreSQL. They do not replace tests against real Supabase Auth sessions or browser end-to-end testing. A committed npm lockfile is still missing.
+GitHub Actions runs dependency installation, lint, a Next.js production build, and a disposable PostgreSQL migration/RLS/trigger check on pushes and pull requests to `main`. Run 74 passed all checks for commit `1adc39de7072d2bd7cfe9d7de9545a125fd7b926` on 1 November 2026, including behaviour tests using separate simulated customer/provider identities. CI checks customer data privacy, provider area/category matching, quote permissions, and offer acceptance rules against disposable PostgreSQL. They do not replace tests against real Supabase Auth sessions or browser end-to-end testing. A committed npm lockfile is still missing.
 
 ## Supabase setup
 
