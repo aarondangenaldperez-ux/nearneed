@@ -223,6 +223,31 @@ export async function addProviderService(formData: FormData) {
   redirect("/dashboard?message=service-added");
 }
 
+export async function setProviderServiceStatus(formData: FormData) {
+  const { supabase, user } = await signedInUser();
+  const serviceId = value(formData, "serviceId", 36);
+  const status = value(formData, "status", 10);
+
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(serviceId) ||
+    !["active", "paused"].includes(status)
+  ) {
+    redirect("/dashboard?error=invalid-service");
+  }
+
+  const { error } = await supabase
+    .from("provider_services")
+    .update({ is_active: status === "active" })
+    .eq("id", serviceId)
+    .eq("provider_id", user.id);
+
+  if (error) {
+    redirect("/dashboard?error=service-status-failed");
+  }
+
+  redirect("/dashboard?message=service-status-updated");
+}
+
 export async function submitQuote(formData: FormData) {
   const { supabase, user } = await signedInUser();
 
