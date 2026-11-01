@@ -93,7 +93,7 @@ jobs:
       - name: Verify row-level security and required triggers
         run: |
           rls_count="$(psql "$DATABASE_URL" --tuples-only --no-align --command "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relkind = 'r' AND c.relrowsecurity;")"
-          trigger_count="$(psql "$DATABASE_URL" --tuples-only --no-align --command "SELECT count(*) FROM pg_trigger WHERE NOT tgisinternal AND tgname IN ('on_auth_user_created', 'quotes_close_request_after_accept');")"
+          trigger_count="$(psql "$DATABASE_URL" --tuples-only --no-align --command "SELECT count(*) FROM pg_trigger WHERE NOT tgisinternal AND tgname IN ('on_auth_user_created', 'quotes_close_request_after_accept', 'quotes_guard_acceptance');")"
           policy_count="$(psql "$DATABASE_URL" --tuples-only --no-align --command "SELECT count(*) FROM pg_policies WHERE schemaname = 'public';")"
           test "$rls_count" -eq 7
           test "$trigger_count" -eq 3
