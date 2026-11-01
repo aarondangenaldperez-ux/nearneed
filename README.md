@@ -44,7 +44,7 @@ npm run dev
 
 Open http://localhost:3000.
 
-GitHub Actions runs dependency installation, lint, and a Next.js production build on pushes and pull requests to `main`. Run 53 passed those checks on 1 November 2026. A PostgreSQL migration/RLS validation gate has now been added; its first result is pending. A committed npm lockfile is still missing.
+GitHub Actions runs dependency installation, lint, a Next.js production build, and a disposable PostgreSQL migration/RLS/trigger check on pushes and pull requests to `main`. Run 62 passed all these checks for commit `7f7775d6ea51567b93459431025475195d4e5342` on 1 November 2026. A committed npm lockfile is still missing. These CI checks do not replace live Supabase identity/RLS tests or browser end-to-end testing.
 
 ## Supabase setup
 
