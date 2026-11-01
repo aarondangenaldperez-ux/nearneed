@@ -1,54 +1,57 @@
 # NearNeed project status
 
 **Last reviewed:** 1 November 2026  
-**Source of truth:** GitHub `main` branch and its latest CI run  
+**Source of truth:** GitHub `main` and the workflow run for its latest commit  
 **Product state:** MVP engineering foundation; not production-ready
 
 ## 1. Completed and verified
 
-- [x] Connected GitHub tools can read and write the repository; changes are saved as commits.
-- [x] Existing Next.js app inspected; useful homepage and responsive styling preserved.
-- [x] Product strategy, Philippine competitor scan, MVP requirements, data/security notes, and pilot plan recorded under `docs/`.
-- [x] Supabase SSR auth, invite-gated sign-up, confirmation callback, and customer/provider dashboard code exists.
-- [x] GitHub Actions has previously passed dependency installation, ESLint, and the Next.js production build on commit `ec093c252d6e7890e1734c45c8de67058f036637` (run 53).
-- [x] Current workflow and execution limitations documented in `docs/DEVELOPMENT_WORKFLOW.md`.
+- [x] Connected GitHub tools can read and write this repository; file updates are saved as Git commits.
+- [x] Existing Next.js application inspected; the homepage and responsive styling were preserved.
+- [x] Product strategy, competitor scan, MVP requirements, data/security notes, pilot plan, and development workflow are documented.
+- [x] Supabase SSR authentication scaffolding, invite-gated adult registration, email confirmation callback, and customer/provider dashboard code are implemented.
+- [x] Customer request, provider profile/service, provider offer, and customer offer-decision server actions are implemented.
+- [x] PostgreSQL migration applies successfully to a disposable PostgreSQL 16 database in CI.
+- [x] GitHub Actions run **#62** for commit `7f7775d6ea51567b93459431025475195d4e5342` passed dependency installation, ESLint, Next.js production build, database migration, and the CI schema/RLS/trigger assertions.
+- [x] The latest CI run's exact job and all 10 substantive steps were inspected; every step completed successfully.
+
+Latest run: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41288155057
 
 ## 2. Implemented but awaiting verification
 
-- [x] Supabase migration syntax corrections. Malformed dollar-quote delimiters and a dangling comma were fixed and the migration applied successfully in disposable PostgreSQL.
-- [x] PostgreSQL CI test using a disposable Postgres 16 service, a minimal Auth schema stub, and RLS/trigger assertions.
-- [ ] Supabase server/client integration and all database operations against a real configured project.
-- [ ] Customer/provider RLS behaviour using distinct real test users.
-- [ ] Auth registration, confirmation, sign-in, sign-out, and invite gate in a real Supabase project.
+- [ ] Supabase SSR session and database integration against a real configured Supabase project.
+- [ ] Registration, confirmation, sign-in, sign-out, invite gate, and recovery flows using real email delivery.
+- [ ] RLS authorization behaviour using distinct customer and provider identities. CI currently validates migration application, RLS enabled on seven tables, 19 policies, and two critical triggers; it does not simulate real authenticated user sessions.
+- [ ] End-to-end customer/provider journeys in a real browser.
+- [ ] Production hosting behaviour, headers, environment configuration, backups, and monitoring.
 
-## 3. Currently being developed
+## 3. Currently being developed / next engineering priorities
 
-- [x] CI now tests database schema and critical security objects, not just frontend compilation.
-- [x] Established the first repeatable database migration gate and recorded its successful run.
+1. Make the database migration and application contracts more thoroughly tested, including actual per-role RLS tests.
+2. Add safe report submission UI and a restricted moderation process before any live user-generated content.
+3. Add rate limits and anti-spam controls to account creation, requests, and offers.
+4. Complete robust search/filtering and matching rules, including category, service mode, and location semantics.
+5. Add accessibility and end-to-end tests for core customer/provider flows.
 
 ## 4. Not yet started
 
-- [ ] Real Supabase project setup and migration deployment.
-- [ ] End-to-end browser tests for customer and provider journeys.
-- [ ] Messaging, notifications, reviews/reputation, user reporting UI, moderation/admin dashboard.
-- [ ] Availability/preferences and robust search/matching beyond the current area/category feed.
-- [ ] Rate limiting, abuse monitoring, privacy workflows, retention, backup/restore, and incident response.
-- [ ] Terms, privacy notice, community rules, moderation procedures, and support operations reviewed for the actual deployment.
-- [ ] Hosting, custom domain, environment variables, monitoring, and production deployment.
-- [ ] Market validation with adult customers/providers in one chosen launch locality.
+- Messaging and notification delivery.
+- Reviews/reputation tied to confirmed completed work.
+- Moderator/admin dashboard and auditable moderation actions.
+- Advanced availability/preferences and geospatial discovery.
+- Payment provider integration, subscriptions, commissions, or paid promotions.
+- Production deployment, custom domain, monitoring, backup/restore, and incident drills.
+- Locality/category market validation with adult customers and providers.
 
-## 5. Blocked
+## 5. Blocked / requires external setup
 
-- **Local run in this ChatGPT runtime:** direct `git clone` could not resolve `github.com`; local Node/Next server and browser testing cannot be performed from this runtime.
-- **Live backend integration:** no Supabase project is connected/configured in the available tools. Do not paste secrets into chat.
-- **Private repository:** GitHub reports the repository visibility as `public`. The available GitHub tools can edit files but do not expose a visibility-settings update action.
+- **Live backend:** no Supabase project is connected or configured through the available tools. A project owner must create/configure it and set the public URL/publishable key in deployment secrets. Never paste secrets into chat.
+- **Local runtime:** direct clone from this ChatGPT runtime failed because it could not resolve `github.com`; local Node server and browser testing are not available here. GitHub Actions is the verified remote execution environment.
+- **Repository privacy:** GitHub reports the repository is public. The available connected GitHub actions do not expose a visibility-settings update. The owner must change it manually in GitHub Settings before adding confidential project information.
+- **Legal/business operations:** terms, privacy notice, moderation, support, retention, and any payment arrangements need appropriate adult owner review before real users or money are involved.
 
 ## Important scope statement
 
-The current homepage search uses example data. The homepage request form only previews input locally. The dashboard code is written for Supabase but cannot operate until a Supabase project is configured. A successful CI build is not evidence of a live production marketplace.
+The homepage's search and service cards still use sample data; its request preview is local-only and does not save or send content. Dashboard code expects Supabase and is not live until a project is configured and tested. There is no live messaging, notification, review, admin, payment, or deployment system yet.
 
-## Latest execution record
-
-- GitHub Actions run 61, commit `857e26333951aef45c9a1572194915b11afb8613` — install, ESLint, Next.js production build, PostgreSQL migration, RLS count, policy count, and critical trigger checks all succeeded.
-- Result URL: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41288029213
-- Update this section after inspecting the workflow run associated with the latest commit.
+A green CI run proves the checks listed above passed. It does not prove a live production marketplace, real Supabase integration, complete authorization behaviour, or end-to-end browser correctness.
