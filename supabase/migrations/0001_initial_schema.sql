@@ -4,10 +4,6 @@
 begin;
 
 do $$ begin
-  create type public.profile_role as enum ('customer', 'provider', 'both');
-exception when duplicate_object then null; end $$;
-
-do $$ begin
   create type public.service_mode as enum ('online', 'in_person', 'hybrid');
 exception when duplicate_object then null; end $$;
 
@@ -28,7 +24,6 @@ exception when duplicate_object then null; end $$;
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text not null check (char_length(btrim(display_name)) between 2 and 60),
-  role public.profile_role not null default 'customer',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -111,10 +106,7 @@ create table if not exists public.reports (
   reason public.report_reason not null,
   details text check (details is null or char_length(details) <= 1500),
   created_at timestamptz not null default now(),
-  constraint report_has_target check (
-    reported_user_id is not null or request_id is not null or quote_id is not null
-  )
-);
+  );
 
 create index if not exists provider_services_area_idx
   on public.provider_services (province, city, category_id)
@@ -250,7 +242,8 @@ revoke all on table public.need_requests from anon, authenticated;
 revoke all on table public.quotes from anon, authenticated;
 revoke all on table public.reports from anon, authenticated;
 
-grant select, update on table public.profiles to authenticated;
+grant select on table public.profiles to authenticated;
+grant update (display_name) on table public.profiles to authenticated;
 grant select on table public.provider_profiles to anon, authenticated;
 grant insert, update, delete on table public.provider_profiles to authenticated;
 grant select on table public.service_categories to anon, authenticated;
@@ -423,6 +416,7 @@ create policy "users can submit reports"
   on public.reports for insert to authenticated
   with check (
     reporter_id = (select auth.uid())
+    and (reported_user_id is not null or request_id is not null or quote_id is not null)
     and (reported_user_id is null or reported_user_id <> (select auth.uid()))
   );
 
