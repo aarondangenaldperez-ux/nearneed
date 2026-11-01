@@ -76,7 +76,7 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
     supabase.from("service_categories").select("id,name").eq("is_active", true).order("name"),
     supabase.from("need_requests").select("id,title,description,city,province,status,created_at,budget_min,budget_max,service_categories(name),quotes(id,status,message,price_amount,pricing_note,estimated_days,provider_profiles(public_name,business_name))").eq("customer_id", user.id).order("created_at", { ascending: false }),
     supabase.from("provider_profiles").select("public_name,business_name,about,city,province,is_published").eq("user_id", user.id).maybeSingle(),
-    supabase.from("provider_services").select("id,title,description,city,province,is_active,service_categories(name)").eq("provider_id", user.id).order("created_at", { ascending: false }),
+    supabase.from("provider_services").select("id,title,description,city,province,is_active,price_from,pricing_note,service_categories(name)").eq("provider_id", user.id).order("created_at", { ascending: false }),
     requestedServiceId
       ? supabase.from("provider_services").select("id,provider_id,title,category_id,city,province").eq("id", requestedServiceId).eq("is_active", true).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
@@ -172,7 +172,7 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
 
           {providerProfile?.is_published && <div className="provider-services">
             <h3>Your service listings</h3>
-            {providerServices.length > 0 ? <ul className="simple-list">{providerServices.map((service) => <li key={service.id}><span>{service.title} · {service.city}, {service.province}</span><small>{service.is_active ? "Active" : "Paused"}</small></li>)}</ul> : <p className="empty-dashboard">No service listings yet.</p>}
+            {providerServices.length > 0 ? <ul className="simple-list">{providerServices.map((service) => <li key={service.id}><span>{service.title} · {service.city}, {service.province}<small>{service.price_from === null ? "Price on request" : "From " + money(service.price_from)}{service.pricing_note ? " · " + service.pricing_note : ""}</small></span><small>{service.is_active ? "Active" : "Paused"}</small></li>)}</ul> : <p className="empty-dashboard">No service listings yet.</p>}
             <form action={addProviderService} className="dashboard-form">
               <h3>Add a service</h3>
               <label htmlFor="service-title">Service title</label><input id="service-title" name="serviceTitle" minLength={4} maxLength={100} required />
@@ -180,6 +180,8 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
               <div className="form-grid">
                 <div><label htmlFor="service-category">Category</label><select id="service-category" name="categoryId" required defaultValue=""><option value="" disabled>Select category</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></div>
                 <div><label htmlFor="service-mode">How is it delivered?</label><select id="service-mode" name="serviceMode" defaultValue="in_person"><option value="in_person">In person</option><option value="online">Online</option><option value="hybrid">Online and in person</option></select></div>
+                <div><label htmlFor="service-price-from">Starting price (PHP, optional)</label><input id="service-price-from" name="servicePriceFrom" type="number" min="0" max="9999999999.99" step="0.01" inputMode="decimal" /></div>
+                <div><label htmlFor="service-pricing-note">Pricing note (optional)</label><input id="service-pricing-note" name="servicePricingNote" maxLength={120} placeholder="e.g. Depends on project scope" /></div>
                 <div><label htmlFor="service-city">Service city / municipality</label><input id="service-city" name="serviceCity" minLength={2} maxLength={100} defaultValue={providerProfile.city} required /></div>
                 <div><label htmlFor="service-province">Service province / region</label><input id="service-province" name="serviceProvince" minLength={2} maxLength={100} defaultValue={providerProfile.province} required /></div>
               </div>
