@@ -9,6 +9,11 @@ function value(formData: FormData, key: string, maxLength: number): string {
   return typeof entry === "string" ? entry.trim().slice(0, maxLength) : "";
 }
 
+function rawValue(formData: FormData, key: string, maxLength: number): string {
+  const entry = formData.get(key);
+  return typeof entry === "string" ? entry.slice(0, maxLength) : "";
+}
+
 function emailLooksValid(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -27,7 +32,7 @@ async function signedInUser() {
 export async function signUp(formData: FormData) {
   const displayName = value(formData, "displayName", 60);
   const email = value(formData, "email", 254).toLowerCase();
-  const password = value(formData, "password", 128);
+  const password = rawValue(formData, "password", 128);
   const inviteCode = value(formData, "inviteCode", 256);
   const expectedCode = process.env.NEED_PILOT_INVITE_CODE;
   const inviteBytes = Buffer.from(inviteCode);
@@ -68,7 +73,7 @@ export async function signUp(formData: FormData) {
 
 export async function signIn(formData: FormData) {
   const email = value(formData, "email", 254).toLowerCase();
-  const password = value(formData, "password", 128);
+  const password = rawValue(formData, "password", 128);
 
   if (!emailLooksValid(email) || !password) {
     redirect("/login?error=invalid-login");
