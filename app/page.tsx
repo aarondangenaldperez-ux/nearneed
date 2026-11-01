@@ -143,7 +143,7 @@ export default function Home() {
           <h1>Whatever you need,<br /><em>start nearby.</em></h1>
           <p className="hero-lede">From a quick repair to a big idea, find people in your community who can help make it happen.</p>
           <div className="hero-actions"><a className="button button-dark" href="#post-need">Tell us what you need <span>↗</span></a><a className="text-link" href="#explore">Explore services <span>↓</span></a></div>
-          <div className="hero-note"><span className="prototype-dot" aria-hidden="true">✳</span><span>Early prototype — no live listings yet</span></div>
+          <div className="hero-note"><span className="prototype-dot" aria-hidden="true">✳</span><span>{discoveryMode === "live" ? "Live directory · provider profiles are self-published" : discoveryMode === "checking" ? "Checking for live provider listings…" : discoveryMode === "error" ? "Live provider directory is unavailable" : "Demo mode · no live listings connected"}</span></div>
         </div>
         <div className="hero-art" aria-label="Illustration of a local community connecting">
           <div className="orbit orbit-one" /><div className="orbit orbit-two" />
