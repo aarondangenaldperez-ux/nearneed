@@ -29,6 +29,8 @@ Read:
 - [MVP requirements](docs/MVP_REQUIREMENTS.md)
 - [Data model and security](docs/DATA_MODEL_AND_SECURITY.md)
 - [Pilot plan](docs/PILOT_PLAN.md)
+- [Development workflow and continuity](docs/DEVELOPMENT_WORKFLOW.md)
+- [Current project status](docs/PROJECT_STATUS.md)
 
 ## Run locally
 
@@ -42,7 +44,7 @@ npm run dev
 
 Open http://localhost:3000.
 
-The CI workflow runs lint and production-build checks on pushes and pull requests to `main`. A lockfile has not yet been generated, and CI has not yet been observed passing.
+GitHub Actions runs dependency installation, lint, and a Next.js production build on pushes and pull requests to `main`. Run 53 passed those checks on 1 November 2026. A PostgreSQL migration/RLS validation gate has now been added; its first result is pending. A committed npm lockfile is still missing.
 
 ## Supabase setup
 
