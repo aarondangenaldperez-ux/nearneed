@@ -19,7 +19,7 @@
 | `provider_profiles` | Deliberately published provider information | Published profiles only |
 | `service_categories` | Controlled service taxonomy | Active categories |
 | `provider_services` | Published service descriptions and approximate price information | Active services of published providers |
-| `need_requests` | Customer requests and area | Owner and eligible signed-in providers |
+| `need_requests` | Customer requests and area | Owner and eligible signed-in providers whose active service area/category matches |
 | `quotes` | Provider offers on requests | Request owner and quote's provider |
 | `reports` | User/content safety reports | Reporter and authorized admin process |
 
@@ -32,7 +32,7 @@
 | Read published provider profiles/services | Yes | Yes | Yes |
 | Create provider service | No | Yes | No |
 | Create request | Yes | No | No |
-| Read own request | Yes | Yes, if eligible open request | No |
+| Read own request | Yes | Yes, if open and an active service matches the city, province, and category | No |
 | Create offer | No | Yes | No |
 | Read own offer | No | Yes | No |
 | Read offers on own request | Yes | No | No |
