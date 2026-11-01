@@ -1,29 +1,126 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-const categories = ["All", "Home services", "Tech help", "Learning", "Creative", "Events"];
-const services = [
-  { id: 1, category: "Home services", icon: "⌂", title: "Home repairs & maintenance", detail: "Common household maintenance and repair request examples.", price: "Pricing varies by provider", tag: "Example category" },
-  { id: 2, category: "Tech help", icon: "⌘", title: "Computer & phone support", detail: "Device setup, software guidance, and everyday tech questions.", price: "Quote-based pricing", tag: "Example category" },
-  { id: 3, category: "Learning", icon: "✳", title: "Tutoring & lessons", detail: "Tutoring, lessons, and practical skill-development examples.", price: "Provider-set pricing", tag: "Example category" },
-  { id: 4, category: "Creative", icon: "✎", title: "Design, photo & video", detail: "Design, photography, and video project examples.", price: "Ask for a quote", tag: "Example category" },
-  { id: 5, category: "Events", icon: "✺", title: "Events & celebrations", detail: "Planning, coordination, and event-supplier examples.", price: "Varies by request", tag: "Example category" },
-  { id: 6, category: "Home services", icon: "♧", title: "Cleaning & home care", detail: "Cleaning and household-care task examples.", price: "Ask for a quote", tag: "Example category" },
+type DiscoveryCategory = { name: string; slug: string };
+type DiscoveryListing = { id: string; title: string; description: string; category: string; categorySlug: string; providerName: string; city: string; province: string; serviceMode: "online" | "in_person" | "hybrid"; priceFrom: number | string | null; pricingNote: string | null };
+type DiscoveryResponse = { source?: "demo" | "live"; categories?: DiscoveryCategory[]; listings?: DiscoveryListing[]; hasMore?: boolean };
+type DisplayService = { id: string | number; category: string; categorySlug: string; icon: string; title: string; detail: string; price: string; tag: string; providerName?: string; city?: string; province?: string; mode?: string };
+
+const demoCategories: DiscoveryCategory[] = [
+  { name: "All", slug: "all" },
+  { name: "Home services", slug: "home-services" },
+  { name: "Tech help", slug: "tech-help" },
+  { name: "Learning", slug: "learning" },
+  { name: "Creative", slug: "creative" },
+  { name: "Events", slug: "events" },
+];
+
+function formatPrice(value: number | string): string {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return "Price available on request";
+  return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP", maximumFractionDigits: 0 }).format(amount);
+}
+
+const categories = demoCategories;
+const services: DisplayService[] = [
+  { id: 1, category: "Home services", categorySlug: "home-services", icon: "⌂", title: "Home repairs & maintenance", detail: "Common household maintenance and repair request examples.", price: "Pricing varies by provider", tag: "Example category" },
+  { id: 2, category: "Tech help", categorySlug: "tech-help", icon: "⌘", title: "Computer & phone support", detail: "Device setup, software guidance, and everyday tech questions.", price: "Quote-based pricing", tag: "Example category" },
+  { id: 3, category: "Learning", categorySlug: "learning", icon: "✳", title: "Tutoring & lessons", detail: "Tutoring, lessons, and practical skill-development examples.", price: "Provider-set pricing", tag: "Example category" },
+  { id: 4, category: "Creative", categorySlug: "creative", icon: "✎", title: "Design, photo & video", detail: "Design, photography, and video project examples.", price: "Ask for a quote", tag: "Example category" },
+  { id: 5, category: "Events", categorySlug: "events", icon: "✺", title: "Events & celebrations", detail: "Planning, coordination, and event-supplier examples.", price: "Varies by request", tag: "Example category" },
+  { id: 6, category: "Home services", categorySlug: "home-services", icon: "♧", title: "Cleaning & home care", detail: "Cleaning and household-care task examples.", price: "Ask for a quote", tag: "Example category" },
 ];
 
 export default function Home() {
   const [query, setQuery] = useState("");
-  const [active, setActive] = useState("All");
+  const [active, setActive] = useState("all");
+  const [city, setCity] = useState("");
+  const [province, setProvince] = useState("");
+  const [discoveryMode, setDiscoveryMode] = useState<"checking" | "demo" | "live" | "error">("checking");
+  const [discoveryLoading, setDiscoveryLoading] = useState(true);
+  const [liveCategories, setLiveCategories] = useState<DiscoveryCategory[]>([]);
+  const [liveServices, setLiveServices] = useState<DisplayService[]>([]);
+  const [hasMore, setHasMore] = useState(false);
   const [need, setNeed] = useState("");
   const [location, setLocation] = useState("");
   const [province, setProvince] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const filtered = useMemo(() => services.filter((service) =>
-    (active === "All" || service.category === active) &&
-    (service.title + " " + service.detail + " " + service.category).toLowerCase().includes(query.toLowerCase())
-  ), [active, query]);
+  useEffect(() => {
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        setDiscoveryLoading(true);
+        const params = new URLSearchParams();
+        if (query.trim()) params.set("q", query.trim());
+        if (active !== "all") params.set("category", active);
+        if (city.trim()) params.set("city", city.trim());
+        if (province.trim()) params.set("province", province.trim());
+
+        try {
+          const response = await fetch("/api/discover?" + params.toString(), {
+            cache: "no-store",
+            signal: controller.signal,
+          });
+          if (!response.ok) throw new Error("Discovery request failed");
+
+          const payload = (await response.json()) as DiscoveryResponse;
+          if (payload.source === "demo") {
+            setDiscoveryMode("demo");
+            setLiveCategories([]);
+            setLiveServices([]);
+            setHasMore(false);
+            return;
+          }
+
+          setDiscoveryMode("live");
+          setLiveCategories(payload.categories ?? []);
+          setLiveServices((payload.listings ?? []).map((listing) => ({
+            id: listing.id,
+            category: listing.category,
+            categorySlug: listing.categorySlug,
+            icon: "✳",
+            title: listing.title,
+            detail: listing.description,
+            price: listing.priceFrom !== null ? "From " + formatPrice(listing.priceFrom) : (listing.pricingNote || "Request a quote"),
+            tag: "Self-published",
+            providerName: listing.providerName,
+            city: listing.city,
+            province: listing.province,
+            mode: listing.serviceMode,
+          })));
+          setHasMore(Boolean(payload.hasMore));
+        } catch {
+          if (!controller.signal.aborted) {
+            setDiscoveryMode("error");
+            setLiveServices([]);
+            setHasMore(false);
+          }
+        } finally {
+          if (!controller.signal.aborted) setDiscoveryLoading(false);
+        }
+      })();
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [query, active, city, province]);
+
+  const filtered = useMemo(() => {
+    if (discoveryMode === "live") return liveServices;
+    if (discoveryMode === "error") return [];
+    return services.filter((service) =>
+      (active === "all" || service.categorySlug === active) &&
+      (service.title + " " + service.detail + " " + service.category).toLowerCase().includes(query.toLowerCase())
+    );
+  }, [active, discoveryMode, liveServices, query]);
+
+  const categoryFilters = discoveryMode === "live"
+    ? [{ name: "All", slug: "all" }, ...liveCategories]
+    : categories;
 
   function submitNeed(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -60,11 +157,29 @@ export default function Home() {
       </section>
 
       <section className="explore section-wrap" id="explore">
-        <div className="section-heading"><div><div className="eyebrow">A GOOD PLACE TO BEGIN</div><h2>What can we help<br /><em>you find?</em></h2></div><p>These are example service categories, not live provider listings. The first pilot area and categories will be selected after customer and provider interviews.</p></div>
-        <div className="search-bar"><span>⌕</span><input aria-label="Search services" placeholder="Try “laptop repair” or “event photographer” (demo search)" value={query} onChange={(e) => setQuery(e.target.value)} /><kbd>SEARCH</kbd></div>
-        <div className="filters" aria-label="Filter service categories">{categories.map((category) => <button key={category} className={active === category ? "filter active" : "filter"} onClick={() => setActive(category)}>{category}</button>)}</div>
-        <div className="service-grid">{filtered.map((service) => <article className="service-card" key={service.id}><div className="service-top"><span className="service-icon">{service.icon}</span><span className="service-tag">{service.tag}</span></div><div><div className="service-category">{service.category}</div><h3>{service.title}</h3><p>{service.detail}</p></div><div className="service-foot"><span>{service.price}</span><a href="#post-need" aria-label={"Ask for " + service.title}>↗</a></div></article>)}</div>
-        {filtered.length === 0 && <p className="empty-state">No matches yet. Try another search or choose a different category.</p>}
+        <div className="section-heading"><div><div className="eyebrow">A GOOD PLACE TO BEGIN</div><h2>What can we help<br /><em>you find?</em></h2></div><p>{discoveryMode === "live" ? "Browse active provider listings from NearNeed's database. Provider information is self-published and has not been identity- or qualification-verified by NearNeed." : discoveryMode === "error" ? "Live provider discovery is temporarily unavailable. Sample listings are hidden so they cannot be mistaken for real providers." : "These are example service categories, not live provider listings. The first pilot area and categories will be selected after customer and provider interviews."}</p></div>
+        <div className="search-bar"><span>⌕</span><input aria-label="Search provider services" maxLength={80} placeholder="Search service titles or descriptions" value={query} onChange={(e) => setQuery(e.target.value)} /><kbd>SEARCH</kbd></div>
+        <div className="discovery-location">
+          <label>CITY / MUNICIPALITY<input aria-label="Filter by city or municipality" maxLength={100} placeholder="e.g. Quezon City" value={city} onChange={(e) => setCity(e.target.value)} /></label>
+          <label>PROVINCE / REGION<input aria-label="Filter by province or region" maxLength={100} placeholder="e.g. Metro Manila" value={province} onChange={(e) => setProvince(e.target.value)} /></label>
+        </div>
+        <div className="filters" aria-label="Filter service categories">{categoryFilters.map((category) => <button key={category.slug} className={active === category.slug ? "filter active" : "filter"} onClick={() => setActive(category.slug)}>{category.name}</button>)}</div>
+        {discoveryMode === "checking" && <p className="discovery-status" role="status">Checking for live provider listings…</p>}
+        {discoveryMode === "live" && <p className="discovery-status" role="status">{discoveryLoading ? "Updating live results…" : "Live provider listings"} · Self-published profiles are not identity-verified by NearNeed.</p>}
+        {discoveryMode === "demo" && <p className="discovery-status" role="status">Demo mode · These are illustrative service categories, not available provider listings.</p>}
+        {discoveryMode === "error" && <p className="discovery-status discovery-error" role="alert">Live discovery could not load. Demo content is hidden so it is not confused with real providers. Please try again later.</p>}
+        <div className="service-grid">{filtered.map((service) => <article className="service-card" key={service.id}>
+          <div className="service-top"><span className="service-icon">{service.icon}</span><span className="service-tag">{service.tag}</span></div>
+          <div>
+            <div className="service-category">{service.category}</div>
+            {service.providerName && <div className="service-provider">By {service.providerName} · self-published</div>}
+            <h3>{service.title}</h3><p>{service.detail}</p>
+            {service.city && <small className="service-area">{service.city}, {service.province} · {service.mode === "online" ? "Online" : service.mode === "hybrid" ? "Online and in person" : "In person"}</small>}
+          </div>
+          <div className="service-foot"><span>{service.price}</span><a href="#post-need" aria-label={"Ask about " + service.title}>↗</a></div>
+        </article>)}</div>
+        {discoveryMode !== "error" && filtered.length === 0 && <p className="empty-state">{discoveryMode === "live" ? "No active published services match these filters yet. Try a broader search or another area." : "No sample categories match. Try another search or choose a different category."}</p>}
+        {discoveryMode === "live" && hasMore && <p className="discovery-status">Showing the latest 48 matches. Narrow your search by category or location to find more relevant results.</p>}}
       </section>
 
       <section className="need-section" id="post-need"><div className="need-inner"><div className="need-copy"><div className="eyebrow eyebrow-light">YOUR NEED IS THE STARTING POINT</div><h2>Got something<br />you <em>need done?</em></h2><p>Describe what you&apos;re looking for and where you are. This prototype shows how a request could begin on NearNeed.</p><div className="need-aside"><span>✳</span><p>No complicated search. Just start with what you need.</p></div></div><div className="need-form-card">{submitted ? <div className="success-state" role="status" aria-live="polite"><span className="success-icon">✓</span><h3>Your request preview</h3><div className="request-preview"><p><strong>Need:</strong> {need}</p><p><strong>City / municipality:</strong> {location}</p><p><strong>Province / region:</strong> {province}</p></div><p>This is a local-only demo. Nothing is uploaded, published, or saved. Never include an exact address or personal contact details.</p><button className="button button-dark" onClick={() => { setSubmitted(false); setNeed(""); setLocation(""); setProvince(""); }}>Create another request</button></div> : <form onSubmit={submitNeed}><div className="form-top"><span>01 / START A REQUEST</span><span className="form-spark">✳</span></div><label htmlFor="need">What do you need help with?</label><textarea id="need" placeholder="e.g. I need someone to help design a small business menu..." value={need} onChange={(e) => setNeed(e.target.value)} required rows={4} /><small className="field-hint">Do not include phone numbers, exact addresses, IDs, or other private information.</small><label htmlFor="location">Which city or municipality?</label><input id="location" placeholder="City or municipality" value={location} onChange={(e) => setLocation(e.target.value)} required /><label htmlFor="province">Which province or region?</label><input id="province" placeholder="e.g. Metro Manila (NCR)" value={province} onChange={(e) => setProvince(e.target.value)} required /><button className="button button-dark submit-button" type="submit">Preview my request <span>↗</span></button><small className="form-disclaimer">Preview only — your text is not submitted to a server.</small></form>}</div></div></section>
