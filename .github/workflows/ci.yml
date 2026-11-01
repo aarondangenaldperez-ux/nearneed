@@ -61,4 +61,4 @@ jobs:
           policy_count="$(psql "$DATABASE_URL" --tuples-only --no-align --command "SELECT count(*) FROM pg_policies WHERE schemaname = 'public';")"
           test "$rls_count" -eq 7
           test "$trigger_count" -eq 2
-          test "$policy_count" -eq 18
+          test "$policy_count" -eq 19
