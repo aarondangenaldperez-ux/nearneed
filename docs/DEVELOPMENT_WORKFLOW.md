@@ -72,7 +72,7 @@ The PostgreSQL job uses a small local Auth schema stub solely to validate migrat
 - Never ask for or commit a service-role key, password, database password, private user record, government ID, or personal contact list.
 - Public Supabase URL and publishable key are environment variables; the service-role key is server-only and must never use a `NEXT_PUBLIC_` variable.
 - Leave the invite gate closed until an adult project owner has reviewed privacy, legal, trust/safety, moderation, and support requirements.
-- The repository is currently public. Change its GitHub visibility to Private before placing confidential business information or non-public code/data in it. This ChatGPT GitHub connection does not currently expose a repository-visibility update action.
+- The latest verified run: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41288155057. The repository is currently public. Change its GitHub visibility to Private before placing confidential business information or non-public code/data in it. This ChatGPT GitHub connection does not currently expose a repository-visibility update action.
 - Do not connect a real payment provider or collect customer/provider personal data until an adult project owner and qualified reviewer have handled applicable legal, privacy, and financial requirements.
 
 ## Resume prompt
