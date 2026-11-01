@@ -2,7 +2,7 @@
 
 **Last reviewed:** 1 November 2026  
 **Source of truth:** GitHub `main` and the workflow run for its latest commit  
-**Verified head:** `adf2fcf79e08a725de7104a000d50cdcec08aa25`  
+**Latest verified code/workflow commit:** `1adc39de7072d2bd7cfe9d7de9545a125fd7b926`  
 **Product state:** MVP engineering foundation; not production-ready
 
 ## 1. Completed and verified
@@ -13,11 +13,11 @@
 - [x] Supabase SSR authentication scaffolding, invite-gated adult registration, email confirmation callback, and customer/provider dashboard code are implemented.
 - [x] Customer request, provider profile/service, provider offer, and customer offer-decision server actions are implemented.
 - [x] PostgreSQL migration applies successfully to a disposable PostgreSQL 16 database in CI.
-- [x] GitHub Actions run **#62** for commit `7f7775d6ea51567b93459431025475195d4e5342` passed dependency installation, ESLint, Next.js production build, database migration, and the CI schema/RLS/trigger assertions.
+- [x] GitHub Actions run **#74** for commit `1adc39de7072d2bd7cfe9d7de9545a125fd7b926` passed dependency installation, ESLint, Next.js production build, PostgreSQL 16 migration, schema/RLS/trigger checks, and identity-based customer/provider authorization assertions.
 - [x] The latest CI run's exact job and all 12 substantive execution steps were inspected; every step completed successfully.
 - [x] CI executed behaviour-level RLS tests using separate customer/provider identities: public provider visibility, customer-owned request and report privacy, provider city/province/category matching, quote authorization, offer acceptance state transition, and prevention of withdrawing an accepted offer.
 
-Latest run: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41288794371
+Latest verified run: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41288976287
 
 ## 2. Implemented but awaiting verification
 
