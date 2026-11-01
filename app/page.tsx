@@ -35,7 +35,7 @@ export default function Home() {
       <header className="topbar">
         <a className="brand" href="#top" aria-label="NearNeed home"><span className="brand-mark">n</span>nearneed<span className="brand-period">.</span></a>
         <nav aria-label="Main navigation"><a href="#explore">Explore</a><a href="#how-it-works">How it works</a><a href="#for-providers">For providers</a></nav>
-        <a className="nav-cta" href="#post-need">Preview a request <span>↗</span></a>
+        <a className="nav-cta" href="/login">Pilot access <span>↗</span></a>
       </header>
 
       <section className="hero" id="top">
