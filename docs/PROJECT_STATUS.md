@@ -2,6 +2,7 @@
 
 **Last reviewed:** 1 November 2026  
 **Source of truth:** GitHub `main` and the workflow run for its latest commit  
+**Verified head:** `adf2fcf79e08a725de7104a000d50cdcec08aa25`  
 **Product state:** MVP engineering foundation; not production-ready
 
 ## 1. Completed and verified
@@ -13,25 +14,27 @@
 - [x] Customer request, provider profile/service, provider offer, and customer offer-decision server actions are implemented.
 - [x] PostgreSQL migration applies successfully to a disposable PostgreSQL 16 database in CI.
 - [x] GitHub Actions run **#62** for commit `7f7775d6ea51567b93459431025475195d4e5342` passed dependency installation, ESLint, Next.js production build, database migration, and the CI schema/RLS/trigger assertions.
-- [x] The latest CI run's exact job and all 10 substantive steps were inspected; every step completed successfully.
+- [x] The latest CI run's exact job and all 12 substantive execution steps were inspected; every step completed successfully.
+- [x] CI executed behaviour-level RLS tests using separate customer/provider identities: public provider visibility, customer-owned request and report privacy, provider city/province/category matching, quote authorization, offer acceptance state transition, and prevention of withdrawing an accepted offer.
 
-Latest run: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41288155057
+Latest run: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41288794371
 
 ## 2. Implemented but awaiting verification
 
 - [ ] Supabase SSR session and database integration against a real configured Supabase project.
 - [ ] Registration, confirmation, sign-in, sign-out, invite gate, and recovery flows using real email delivery.
-- [ ] RLS authorization behaviour using distinct customer and provider identities. CI currently validates migration application, RLS enabled on seven tables, 19 policies, and two critical triggers; it does not simulate real authenticated user sessions.
+- [x] RLS authorization behaviour under distinct simulated customer/provider identities is checked in CI against disposable PostgreSQL.
+- [ ] Repeat RLS authorization behaviour using actual Supabase Auth sessions and a configured Supabase project. The CI Auth schema is a lightweight stub, not the complete Supabase platform.
 - [ ] End-to-end customer/provider journeys in a real browser.
 - [ ] Production hosting behaviour, headers, environment configuration, backups, and monitoring.
 
 ## 3. Currently being developed / next engineering priorities
 
-1. Make the database migration and application contracts more thoroughly tested, including actual per-role RLS tests.
+1. Validate the app's Supabase SSR/auth and database calls against a real configured Supabase project.
 2. Add safe report submission UI and a restricted moderation process before any live user-generated content.
 3. Add rate limits and anti-spam controls to account creation, requests, and offers.
 4. Complete robust search/filtering and matching rules, including category, service mode, and location semantics.
-5. Add accessibility and end-to-end tests for core customer/provider flows.
+5. Add accessibility and browser end-to-end tests for core customer/provider flows.
 
 ## 4. Not yet started
 
