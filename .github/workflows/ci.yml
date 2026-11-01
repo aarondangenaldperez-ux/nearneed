@@ -85,8 +85,10 @@ jobs:
           sudo apt-get install --yes postgresql-client
       - name: Prepare minimal Supabase Auth schema for migration test
         run: psql "$DATABASE_URL" --set ON_ERROR_STOP=1 --file scripts/ci-db-bootstrap.sql
-      - name: Apply Supabase migration to disposable PostgreSQL
-        run: psql "$DATABASE_URL" --set ON_ERROR_STOP=1 --file supabase/migrations/0001_initial_schema.sql
+      - name: Apply Supabase migrations to disposable PostgreSQL
+        run: |
+          psql "$DATABASE_URL" --set ON_ERROR_STOP=1 --file supabase/migrations/0001_initial_schema.sql
+          psql "$DATABASE_URL" --set ON_ERROR_STOP=1 --file supabase/migrations/0002_customer_request_status_guard.sql
       - name: Verify row-level security and required triggers
         run: |
           rls_count="$(psql "$DATABASE_URL" --tuples-only --no-align --command "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relkind = 'r' AND c.relrowsecurity;")"
@@ -98,3 +100,5 @@ jobs:
 
       - name: Test customer/provider row-level access boundaries
         run: psql "$DATABASE_URL" --set ON_ERROR_STOP=1 --file scripts/ci-db-rls-tests.sql
+      - name: Test customer request status transitions
+        run: psql "$DATABASE_URL" --set ON_ERROR_STOP=1 --file scripts/ci-request-status-tests.sql
