@@ -45,7 +45,7 @@ npm run dev
 
 Open http://localhost:3000.
 
-GitHub Actions runs dependency installation, lint, a Next.js production build, and PostgreSQL migration/RLS checks on pushes and pull requests to `main`. Run #83 passed the quote-acceptance guard migration, the one-winner offer regression test, and the existing request-status and RLS checks, in addition to lint and production build. CI uses disposable PostgreSQL and a lightweight Auth stub, not a live Supabase project. The current homepage discovery implementation is awaiting CI run #92. A committed npm lockfile is still missing.
+GitHub Actions runs dependency installation, lint, a Next.js production build, and PostgreSQL migration/RLS checks on pushes and pull requests to `main`. Run #83 passed the quote-acceptance guard migration, the one-winner offer regression test, and the existing request-status and RLS checks, in addition to lint and production build. CI uses disposable PostgreSQL and a lightweight Auth stub, not a live Supabase project. The homepage discovery implementation passed CI run #94, including lint, production build, migration checks, existing RLS tests, and the unpublished-provider regression. This is not a substitute for testing against a real Supabase project. A committed npm lockfile is still missing.
 
 ## Supabase setup
 
