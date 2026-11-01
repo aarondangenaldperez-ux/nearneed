@@ -95,8 +95,12 @@ export async function GET(request: NextRequest) {
     const hasMore = rows.length > RESULT_LIMIT;
 
     const listings = rows.slice(0, RESULT_LIMIT).flatMap((service) => {
-      const serviceCategory = service.service_categories[0];
-      const provider = service.provider_profiles[0];
+      const serviceCategory = Array.isArray(service.service_categories)
+        ? service.service_categories[0]
+        : service.service_categories;
+      const provider = Array.isArray(service.provider_profiles)
+        ? service.provider_profiles[0]
+        : service.provider_profiles;
 
       // Inner joins should supply both records; keep the response defensive
       // if schema metadata or row-level policies ever produce an empty embed.
