@@ -27,4 +27,4 @@ AS $$
 $$;
 
 GRANT USAGE ON SCHEMA auth TO authenticated;
-GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated;
+GRANT EXECUTE ON FUNCTION auth.uid() TO anon, authenticated;
