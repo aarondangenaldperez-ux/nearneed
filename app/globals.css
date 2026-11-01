@@ -69,6 +69,8 @@
 .simple-list{list-style:none;padding:0;margin:0 0 22px;display:grid;gap:8px}
 .simple-list li{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;background:#f7f8f4;border-radius:4px;font-size:11px}
 .simple-list small{color:#6b8547}
+.simple-list li>span{min-width:0;display:grid;gap:4px}
+.simple-list li form{margin:0;flex-shrink:0;align-self:center}
 .quote-form{border-top:1px solid #e9ede5;padding-top:18px;margin-top:16px}
 .quote-form h3{margin:0 0 5px}
 @media(max-width:680px){
