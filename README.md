@@ -32,7 +32,7 @@ Read:
 
 ## Run locally
 
-Requirements: Node.js 22 or later and npm.
+Requirements: Node.js 22.13 or later and npm.
 
 ```bash
 npm install
@@ -54,7 +54,7 @@ The CI workflow runs lint and production-build checks on pushes and pull request
 6. Keep `NEED_PILOT_INVITE_CODE` unset until the pilot is ready. When needed, configure a strong random value as a server-only environment variable; never use a `NEXT_PUBLIC_` prefix for it.
 7. Never put a Supabase service-role or secret key in browser code or a public repository.
 
-The app uses `@supabase/ssr` cookie-based sessions. On Next.js 15 the session refresh handler is `middleware.ts`, not `proxy.ts`.
+The app uses `@supabase/ssr` cookie-based sessions. On Next.js 16, Supabase session refresh runs in the root `proxy.ts` convention.
 
 ## Security and privacy
 
