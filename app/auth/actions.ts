@@ -186,6 +186,9 @@ export async function addProviderService(formData: FormData) {
   const city = value(formData, "serviceCity", 100);
   const province = value(formData, "serviceProvince", 100);
   const mode = value(formData, "serviceMode", 20);
+  const priceRaw = value(formData, "servicePriceFrom", 30);
+  const pricingNote = value(formData, "servicePricingNote", 120);
+  const priceFrom = priceRaw ? Number(priceRaw) : null;
   const allowedModes = new Set(["online", "in_person", "hybrid"]);
 
   if (
@@ -194,7 +197,8 @@ export async function addProviderService(formData: FormData) {
     description.length < 20 ||
     city.length < 2 ||
     province.length < 2 ||
-    !allowedModes.has(mode)
+    !allowedModes.has(mode) ||
+    (priceFrom !== null && (!Number.isFinite(priceFrom) || priceFrom < 0 || priceFrom > 9999999999.99))
   ) {
     redirect("/dashboard?error=invalid-service");
   }
@@ -207,6 +211,8 @@ export async function addProviderService(formData: FormData) {
     city,
     province,
     service_mode: mode,
+    price_from: priceFrom,
+    pricing_note: pricingNote || null,
     is_active: true,
   });
 
