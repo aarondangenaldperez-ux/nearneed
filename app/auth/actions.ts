@@ -1,6 +1,5 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -28,16 +27,23 @@ export async function signUp(formData: FormData) {
   const displayName = value(formData, "displayName", 60);
   const email = value(formData, "email", 254).toLowerCase();
   const password = value(formData, "password", 128);
+  const inviteCode = value(formData, "inviteCode", 256);
+  const expectedCode = process.env.NEED_PILOT_INVITE_CODE;
+  const inviteBytes = Buffer.from(inviteCode);
+  const expectedBytes = Buffer.from(expectedCode ?? "");
+  const validInvite = Boolean(
+    expectedCode &&
+    inviteBytes.length > 0 &&
+    inviteBytes.length === expectedBytes.length &&
+    require("node:crypto").timingSafeEqual(inviteBytes, expectedBytes)
+  );
 
-  if (displayName.length < 2 || !emailLooksValid(email) || password.length < 10) {
+  if (displayName.length < 2 || !emailLooksValid(email) || password.length < 10 || !validInvite) {
     redirect("/login?error=invalid-registration");
   }
 
   const supabase = await createClient();
-  const headerStore = await headers();
-  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
-  const protocol = headerStore.get("x-forwarded-proto") ?? "https";
-  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? (host ? `${protocol}://${host}` : "http://localhost:3000");
+  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
   const { data, error } = await supabase.auth.signUp({
     email,
