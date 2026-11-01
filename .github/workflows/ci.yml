@@ -16,17 +16,49 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: nearneed_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d nearneed_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/nearneed_test
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.13
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Run lint
         run: npm run lint
       - name: Build application
         run: npm run build
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client
+      - name: Prepare minimal Supabase Auth schema for migration test
+        run: psql "$DATABASE_URL" --set ON_ERROR_STOP=1 --file scripts/ci-db-bootstrap.sql
+      - name: Apply Supabase migration to disposable PostgreSQL
+        run: psql "$DATABASE_URL" --set ON_ERROR_STOP=1 --file supabase/migrations/0001_initial_schema.sql
+      - name: Verify row-level security and required triggers
+        run: |
+          rls_count="$(psql "$DATABASE_URL" --tuples-only --no-align --command "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relkind = 'r' AND c.relrowsecurity;")"
+          trigger_count="$(psql "$DATABASE_URL" --tuples-only --no-align --command "SELECT count(*) FROM pg_trigger WHERE NOT tgisinternal AND tgname IN ('on_auth_user_created', 'quotes_close_request_after_accept');")"
+          policy_count="$(psql "$DATABASE_URL" --tuples-only --no-align --command "SELECT count(*) FROM pg_policies WHERE schemaname = 'public';")"
+          test "$rls_count" -eq 7
+          test "$trigger_count" -eq 2
+          test "$policy_count" -eq 18
