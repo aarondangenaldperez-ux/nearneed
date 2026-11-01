@@ -8,13 +8,15 @@ insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0000-000000000001', '{"display_name":"Customer A"}'),
   ('00000000-0000-0000-0000-000000000002', '{"display_name":"Provider A"}'),
   ('00000000-0000-0000-0000-000000000003', '{"display_name":"Provider B"}'),
-  ('00000000-0000-0000-0000-000000000004', '{"display_name":"Customer B"}');
+  ('00000000-0000-0000-0000-000000000004', '{"display_name":"Customer B"}'),
+  ('00000000-0000-0000-0000-000000000005', '{"display_name":"Unpublished Provider"}');
 
 insert into public.provider_profiles
   (user_id, public_name, about, city, province, is_published)
 values
   ('00000000-0000-0000-0000-000000000002', 'Provider A', 'Provides local technology help and support.', 'Quezon City', 'Metro Manila', true),
-  ('00000000-0000-0000-0000-000000000003', 'Provider B', 'Provides local household cleaning services.', 'Davao City', 'Davao del Sur', true);
+  ('00000000-0000-0000-0000-000000000003', 'Provider B', 'Provides local household cleaning services.', 'Davao City', 'Davao del Sur', true),
+  ('00000000-0000-0000-0000-000000000005', 'Unpublished Provider', 'This profile must not appear in public discovery.', 'Makati', 'Metro Manila', false);
 
 insert into public.provider_services
   (provider_id, category_id, title, description, city, province, is_active)
@@ -24,7 +26,10 @@ values
    'Computer setup and support', 'Setup, troubleshooting, and everyday computer support.', 'Quezon City', 'Metro Manila', true),
   ('00000000-0000-0000-0000-000000000003',
    (select id from public.service_categories where slug = 'home-services'),
-   'Home cleaning service', 'Regular household cleaning and basic organization.', 'Davao City', 'Davao del Sur', true);
+   'Home cleaning service', 'Regular household cleaning and basic organization.', 'Davao City', 'Davao del Sur', true),
+  ('00000000-0000-0000-0000-000000000005',
+   (select id from public.service_categories where slug = 'tech-help'),
+   'Unpublished sample service', 'This service must not appear in public discovery.', 'Makati', 'Metro Manila', true);
 
 insert into public.need_requests
   (id, customer_id, category_id, title, description, city, province, status, budget_min, budget_max)
@@ -65,21 +70,31 @@ values
 
 -- Anonymous visitors may read only published provider profiles and public services.
 set role anon;
-do $$
+do $
 declare
   visible_profiles integer;
   visible_services integer;
+  visible_joined_listings integer;
 begin
   select count(*) into visible_profiles from public.provider_profiles;
   select count(*) into visible_services from public.provider_services;
+  select count(*) into visible_joined_listings
+    from public.provider_services ps
+    join public.provider_profiles pp on pp.user_id = ps.provider_id
+    join public.service_categories sc on sc.id = ps.category_id
+    where ps.is_active = true and pp.is_published = true and sc.is_active = true;
+
   if visible_profiles <> 2 then
     raise exception 'Anonymous users should see exactly 2 published provider profiles; saw %', visible_profiles;
   end if;
   if visible_services <> 2 then
     raise exception 'Anonymous users should see exactly 2 active services of published providers; saw %', visible_services;
   end if;
+  if visible_joined_listings <> 2 then
+    raise exception 'Public discovery joins should return only 2 active services from published providers; saw %', visible_joined_listings;
+  end if;
 end
-$$;
+$;
 reset role;
 
 -- Customer A can see only their own request and no offers on another customer's request.
