@@ -62,3 +62,6 @@ jobs:
           test "$rls_count" -eq 7
           test "$trigger_count" -eq 2
           test "$policy_count" -eq 19
+
+      - name: Test customer/provider row-level access boundaries
+        run: psql "$DATABASE_URL" --set ON_ERROR_STOP=1 --file scripts/ci-db-rls-tests.sql
