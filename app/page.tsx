@@ -176,7 +176,7 @@ export default function Home() {
             <h3>{service.title}</h3><p>{service.detail}</p>
             {service.city && <small className="service-area">{service.city}, {service.province} · {service.mode === "online" ? "Online" : service.mode === "hybrid" ? "Online and in person" : "In person"}</small>}
           </div>
-          <div className="service-foot"><span>{service.price}</span><a href={discoveryMode === "live" ? "/dashboard" : "#post-need"} aria-label={discoveryMode === "live" ? "Create a request for " + service.title : "Preview a request for " + service.title}>↗</a></div>
+          <div className="service-foot"><span>{service.price}</span><a href={discoveryMode === "live" ? "/dashboard?service=" + encodeURIComponent(String(service.id)) : "#post-need"} aria-label={discoveryMode === "live" ? "Start a request based on " + service.title : "Preview a request for " + service.title}>↗</a></div>
         </article>)}</div>
         {discoveryMode !== "error" && filtered.length === 0 && <p className="empty-state">{discoveryMode === "live" ? "No active published services match these filters yet. Try a broader search or another area." : "No sample categories match. Try another search or choose a different category."}</p>}
         {discoveryMode === "live" && hasMore && <p className="discovery-status">Showing the latest 48 matches. Narrow your search by category or location to find more relevant results.</p>}
