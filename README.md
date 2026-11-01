@@ -9,7 +9,9 @@ NearNeed is a Philippines-focused, request-first local services marketplace conc
 **MVP application foundation — not a live public marketplace.**
 
 The repository contains:
-- a responsive homepage with example service categories and a clearly labelled, local-only request preview;
+- a responsive homepage with Supabase-backed public provider discovery when configured, including service-title/description search, category filters, and city/province filters; the unconfigured fallback is clearly labelled demo content;
+- a public discovery route that only returns active services from published providers and active categories, with no-store responses and a bounded result set;
+- a clearly labelled, local-only request preview on the homepage; it does not publish or save a request;
 - Supabase SSR authentication scaffolding (email/password sign-in, invite-gated registration, email confirmation, and session refresh);
 - a customer/provider dashboard with request creation, provider profiles, service listings, offers, and offer decisions;
 - PostgreSQL migrations with Row Level Security policies for seven application tables;
@@ -17,7 +19,7 @@ The repository contains:
 
 Live data flows are **not connected or verified yet**. A Supabase project must be created, migrations reviewed/applied, email confirmation configured, and project URL/publishable key set in local/deployment environment variables. The registration gate remains closed unless a server-only pilot invite code is configured. Do not open registration until privacy notice, terms, reporting, moderation, and support procedures are ready.
 
-The homepage search still uses example data. Its request preview is local-only and does not transmit or save the text. The dashboard uses Supabase server-side operations and database RLS, but it will not work until the backend is configured.
+The homepage now queries public provider listings from Supabase when the backend is configured. Discovery filters active services through published provider profiles and active categories; it searches service titles/descriptions and can filter by city, province, and category. Provider cards are explicitly labelled self-published, not identity-verified. When Supabase is not configured, the page falls back to clearly labelled sample categories. Its request preview remains local-only and does not transmit or save the text. The discovery query and UI code have not yet been exercised against a real Supabase project. The dashboard also remains unavailable until the backend is configured.
 
 ## Strategic focus
 
@@ -43,7 +45,7 @@ npm run dev
 
 Open http://localhost:3000.
 
-GitHub Actions runs dependency installation, lint, a Next.js production build, and PostgreSQL migration/RLS checks on pushes and pull requests to `main`. Run #74 passed all existing checks for commit `1adc39de7072d2bd7cfe9d7de9545a125fd7b926`, including behaviour tests using separate simulated customer/provider identities. A new migration and regression test now restrict customer request status transitions; run #78 is the verification run for that change. CI tests use disposable PostgreSQL and a lightweight Auth stub, not a live Supabase project. A committed npm lockfile is still missing.
+GitHub Actions runs dependency installation, lint, a Next.js production build, and PostgreSQL migration/RLS checks on pushes and pull requests to `main`. Run #83 passed the quote-acceptance guard migration, the one-winner offer regression test, and the existing request-status and RLS checks, in addition to lint and production build. CI uses disposable PostgreSQL and a lightweight Auth stub, not a live Supabase project. The current homepage discovery implementation is awaiting CI run #92. A committed npm lockfile is still missing.
 
 ## Supabase setup
 
