@@ -15,6 +15,7 @@ const messages: Record<string, string> = {
   "invalid-login": "Enter a valid email and password.",
   "login-failed": "We couldn't sign you in. Check your details and try again.",
   "confirmation-failed": "That confirmation link is missing or expired. Request a new one.",
+  "pilot-closed": "New pilot accounts are currently closed. Registration is invite-only and managed by the project owner.",
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
@@ -37,6 +38,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const registrationOpen = Boolean(process.env.NEED_PILOT_INVITE_CODE);
 
   if (user) {
     redirect("/dashboard");
@@ -48,7 +50,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <Link className="brand" href="/"><span className="brand-mark">n</span>nearneed<span className="brand-period">.</span></Link>
         <span className="eyebrow">EARLY PILOT ACCESS</span>
         <h1>Welcome to NearNeed.</h1>
-        <p>Accounts are for the controlled adult pilot only. Do not register if you are under 18.</p>
+        <p>Access is restricted to adults explicitly invited into a controlled pilot. Do not register if you are under 18.</p>
         {params.message === "check-email" && <p className="notice notice-success" role="status">Check your email for the confirmation link before signing in.</p>}
         {params.error && <p className="notice notice-error" role="alert">{messages[params.error] ?? "Something went wrong. Please try again."}</p>}
         <div className="auth-columns">
@@ -60,16 +62,18 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <input id="signin-password" name="password" type="password" autoComplete="current-password" required />
             <button className="button button-dark" type="submit">Sign in <span>↗</span></button>
           </form>
-          <form action={signUp} className="auth-form">
+          {registrationOpen ? <form action={signUp} className="auth-form">
             <h2>Create account</h2>
             <label htmlFor="signup-name">Display name</label>
             <input id="signup-name" name="displayName" autoComplete="name" minLength={2} maxLength={60} required />
             <label htmlFor="signup-email">Email</label>
             <input id="signup-email" name="email" type="email" autoComplete="email" maxLength={254} required />
+            <label htmlFor="signup-invite">Pilot invitation code</label>
+            <input id="signup-invite" name="inviteCode" type="password" autoComplete="off" maxLength={256} required />
             <label htmlFor="signup-password">Password (10+ characters)</label>
             <input id="signup-password" name="password" type="password" autoComplete="new-password" minLength={10} maxLength={128} required />
             <button className="button button-dark" type="submit">Create account <span>↗</span></button>
-          </form>
+          </form> : <div className="auth-form"><h2>Registration closed</h2><p>New accounts are invite-only. The project owner must configure the private pilot invite before registration can open.</p></div>}
         </div>
         <p className="auth-footnote">Never add an exact home address, government ID, phone number, or payment details to a public request. Pilot accounts and provider listings are not endorsements or safety guarantees.</p>
         <Link className="text-link" href="/">← Back to homepage</Link>
