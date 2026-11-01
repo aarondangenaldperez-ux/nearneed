@@ -159,14 +159,14 @@ begin
     raise exception 'Accepting one offer must decline every other outstanding offer';
   end if;
 end
-$;
+$$;
 reset role;
 
 -- Even a privileged writer must not be able to accept a stale offer after the request is matched.
 update public.quotes
   set status = 'sent'
   where id = '00000000-0000-0000-0000-000000000202';
-do $
+do $$
 begin
   begin
     update public.quotes
@@ -177,7 +177,7 @@ begin
     when check_violation then null;
   end;
 end
-$;
+$$;
 update public.quotes
   set status = 'declined'
   where id = '00000000-0000-0000-0000-000000000202';
