@@ -28,7 +28,7 @@ The repository is the durable source of truth. A chat transcript is not a source
 | Write and commit files through the connected GitHub tools | Verified |
 | Repository push/admin permission | Verified at last inspection |
 | GitHub Actions remote execution | Verified; lint and production build passed on commit `ec093c252d6e7890e1734c45c8de67058f036637` |
-| PostgreSQL execution in GitHub Actions | Added to CI; pending its first successful run after this change |
+| PostgreSQL execution in GitHub Actions | Verified; disposable Postgres 16 applied the migration and all schema/RLS/trigger assertions passed |
 | Local clone from this ChatGPT runtime | Not available in the current session; a direct clone attempt failed because this runtime could not resolve `github.com` |
 | Local browser/device testing from this ChatGPT runtime | Not available |
 | Supabase project access | Not connected or verified |
@@ -65,7 +65,7 @@ The CI workflow should fail when any of these are broken:
 - Supabase schema migration on an ephemeral PostgreSQL instance.
 - Expected RLS policy count and critical database triggers.
 
-The PostgreSQL job uses a small local Auth schema stub solely to validate migration syntax and database objects. It does **not** emulate the complete Supabase platform and does not replace live RLS tests using distinct user identities.
+The PostgreSQL job uses a small local Auth schema stub solely to validate migration syntax and database objects. Run 61 passed. It does **not** emulate the complete Supabase platform and does not replace live RLS tests using distinct user identities.
 
 ## Safety and credential handling
 
