@@ -56,7 +56,12 @@ values
   ('00000000-0000-0000-0000-000000000201',
    '00000000-0000-0000-0000-000000000101',
    '00000000-0000-0000-0000-000000000002',
-   'I can provide the computer setup and software configuration.', 1200, 'sent');
+   'I can provide the computer setup and software configuration.', 1200, 'sent'),
+  -- Deliberately seeded as a second outstanding offer to test one-winner enforcement.
+  ('00000000-0000-0000-0000-000000000202',
+   '00000000-0000-0000-0000-000000000101',
+   '00000000-0000-0000-0000-000000000003',
+   'I can also provide the computer setup and software configuration.', 1300, 'sent');
 
 -- Anonymous visitors may read only published provider profiles and public services.
 set role anon;
@@ -124,8 +129,8 @@ begin
   if visible_requests <> 4 then
     raise exception 'Customer B should see exactly 4 own requests; saw %', visible_requests;
   end if;
-  if visible_quotes <> 1 then
-    raise exception 'Customer B should see the offer on their request; saw %', visible_quotes;
+  if visible_quotes <> 2 then
+    raise exception 'Customer B should see both offers on their request; saw %', visible_quotes;
   end if;
 
   insert into public.reports (reporter_id, reported_user_id, reason, details)
@@ -149,9 +154,33 @@ begin
   if matched_status <> 'matched' then
     raise exception 'Accepting an offer must mark its request matched; got %', matched_status;
   end if;
+
+  if (select status from public.quotes where id = '00000000-0000-0000-0000-000000000202') <> 'declined' then
+    raise exception 'Accepting one offer must decline every other outstanding offer';
+  end if;
 end
-$$;
+$;
 reset role;
+
+-- Even a privileged writer must not be able to accept a stale offer after the request is matched.
+update public.quotes
+  set status = 'sent'
+  where id = '00000000-0000-0000-0000-000000000202';
+do $
+begin
+  begin
+    update public.quotes
+      set status = 'accepted'
+      where id = '00000000-0000-0000-0000-000000000202';
+    raise exception 'Guard failure: a second offer was accepted after the request was matched';
+  exception
+    when check_violation then null;
+  end;
+end
+$;
+update public.quotes
+  set status = 'declined'
+  where id = '00000000-0000-0000-0000-000000000202';
 
 -- Provider A sees only open requests matching active service city, province and category.
 set role authenticated;
