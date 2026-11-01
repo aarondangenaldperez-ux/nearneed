@@ -70,7 +70,7 @@ values
 
 -- Anonymous visitors may read only published provider profiles and public services.
 set role anon;
-do $
+do $$
 declare
   visible_profiles integer;
   visible_services integer;
@@ -94,7 +94,7 @@ begin
     raise exception 'Public discovery joins should return only 2 active services from published providers; saw %', visible_joined_listings;
   end if;
 end
-$;
+$$;
 reset role;
 
 -- Customer A can see only their own request and no offers on another customer's request.
