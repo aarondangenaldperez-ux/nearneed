@@ -28,7 +28,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <Link className="brand" href="/"><span className="brand-mark">n</span>nearneed<span className="brand-period">.</span></Link>
           <span className="eyebrow">ACCOUNT SETUP</span>
           <h1>Authentication is not connected yet.</h1>
-          <p>NearNeed's account flow is prepared, but it needs a Supabase project URL and publishable key before it can create or sign in to accounts.</p>
+          <p>NearNeed&apos;s account flow is prepared, but it needs a Supabase project URL and publishable key before it can create or sign in to accounts.</p>
           <Link className="button button-dark" href="/">Back to NearNeed</Link>
           <p className="auth-footnote">Do not send database passwords or secret keys in chat. Only the public publishable key belongs in the NEXT_PUBLIC environment variable.</p>
         </section>
