@@ -2,7 +2,7 @@
 
 **Last reviewed:** 1 November 2026  
 **Source of truth:** GitHub `main` and the latest applicable GitHub Actions run  
-**Latest implementation commit:** `216afab454d174c7ac74cb84a30e683ac29f11ad`  
+**Latest implementation commit:** `2e0f681a37ea2baebbd6de0452c0f7624b1da134`  
 **Product state:** MVP engineering foundation; not production-ready
 
 ## 1. Completed and verified
@@ -20,6 +20,10 @@
 - [x] CI run **#78** passed the request-status guard migration and regression test, along with lint, production build, and existing database authorization checks.
 - [x] Added migration `0003_quote_acceptance_guard.sql` to serialize offer acceptance, require the parent request to remain open, and prevent a second accepted offer; verified in CI run #83.
 - [x] Implemented a public discovery API and homepage integration for active services from published providers, with active categories, service-title/description search, city/province filters, no-store responses, and a 48-listing cap. CI run #94 verified the lint/build and database regression checks, including exclusion of an active service from an unpublished provider.
+- [x] Improved discovery relation mapping to tolerate both object and array shapes returned by Supabase joins.
+- [x] Added optional provider starting prices in PHP and pricing notes to service creation and dashboard listing views.
+- [x] Added provider-owned pause/reactivate controls for service listings; the server action scopes updates to the signed-in provider and service ID.
+- [x] CI run **#104** passed lint, production build, migration/RLS checks, and existing customer/provider authorization and request-transition tests for the discovery and provider dashboard changes.
 
 Verified run #74: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41288976287  
 Verified request-status guard run #78: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41291369075  
@@ -63,6 +67,6 @@ Verified quote-acceptance guard run #83: https://github.com/aarondangenaldperez-
 
 ## Important scope statement
 
-The homepage now has a Supabase-backed public discovery path, with a clearly labelled sample-category fallback when Supabase is not configured. Its lint/build and disposable PostgreSQL/RLS regression checks passed CI run #94, but it has not been tested against a real Supabase project. The homepage request preview is still local-only and does not save or send content. Dashboard workflows require a configured Supabase project. There is no direct messaging, notification, review, admin, payment, or deployment system.
+The homepage now has a Supabase-backed public discovery path, with a clearly labelled sample-category fallback when Supabase is not configured. Discovery relation mapping, provider pricing fields, and provider-owned listing pause/reactivate actions are included in the current main branch. CI run #104 passed lint, production build, migration, and RLS checks, but the app has not been tested against a real Supabase project. The homepage request preview is still local-only and does not save or send content. Dashboard workflows require a configured Supabase project. There is no direct messaging, notification, review, admin, payment, or deployment system.
 
 A green CI run proves only the checks that actually ran. It does not prove a live production marketplace, real Supabase integration, or end-to-end browser correctness.
