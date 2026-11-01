@@ -2,7 +2,7 @@
 
 **Last reviewed:** 1 November 2026  
 **Source of truth:** GitHub `main` and the latest applicable GitHub Actions run  
-**Latest implementation commit:** `382fc0e11a0d0f956582ff3de3669f5969e41f6f`  
+**Latest implementation commit:** `fcdc75b9db84d6e881b48c6cb961ecc9d692a9e1`  
 **Product state:** MVP engineering foundation; not production-ready
 
 ## 1. Completed and verified
@@ -15,13 +15,16 @@
 - [x] CI run **#74** passed dependency installation, ESLint, Next.js production build, migration, schema/RLS/trigger checks, and simulated identity-based customer/provider authorization tests.
 - [x] CI run #74 tested public provider visibility, customer-owned request/report privacy, provider city/province/category matching, quote permissions, offer acceptance transition, and prevention of withdrawing an accepted offer.
 - [x] Added migration `0002_customer_request_status_guard.sql` to restrict customer status changes to cancelling their own open request. Customers cannot self-assign matched/completed or reopen a cancelled request.
-- [x] Added a dedicated SQL regression test for request status transitions and wired both migrations and tests into CI.
+- [x] Added a dedicated SQL regression test for request status transitions and wired the migration and test into CI.
+- [x] CI run **#78** passed the request-status guard migration and regression test, along with lint, production build, and existing database authorization checks.
+- [ ] Added migration `0003_quote_acceptance_guard.sql` to serialize offer acceptance, require the parent request to remain open, and prevent a second accepted offer. Its new CI regression test is awaiting the latest run.
 
-Verified run #74: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41288976287
+Verified run #74: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41288976287  
+Verified request-status guard run #78: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41291369075
 
 ## 2. Implemented but awaiting verification
 
-- [ ] Latest CI run #78 must complete successfully before the new status-guard migration and regression test are marked verified.
+- [ ] Latest CI run must complete successfully before the new quote-acceptance guard and one-winner regression test are marked verified.
 - [ ] Supabase SSR session and database integration against a real configured Supabase project.
 - [ ] Registration, confirmation, sign-in, sign-out, invite gate, and recovery flows using real email delivery.
 - [x] RLS behaviour under separate simulated customer/provider identities is checked against disposable PostgreSQL.
