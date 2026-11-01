@@ -27,7 +27,7 @@ The repository is the durable source of truth. A chat transcript is not a source
 | Read the NearNeed repository | Verified |
 | Write and commit files through the connected GitHub tools | Verified |
 | Repository push/admin permission | Verified at last inspection |
-| GitHub Actions remote execution | Verified; run 70 passed dependency install, ESLint, production build, PostgreSQL migration, schema checks, and identity-based RLS tests on commit `adf2fcf79e08a725de7104a000d50cdcec08aa25` |
+| GitHub Actions remote execution | Verified; run 74 passed dependency install, ESLint, production build, PostgreSQL migration, schema checks, and identity-based RLS tests on commit `1adc39de7072d2bd7cfe9d7de9545a125fd7b926` |
 | PostgreSQL execution in GitHub Actions | Verified; disposable Postgres 16 applied the migration and all schema/RLS/trigger assertions passed |
 | Local clone from this ChatGPT runtime | Not available in the current session; a direct clone attempt failed because this runtime could not resolve `github.com` |
 | Local browser/device testing from this ChatGPT runtime | Not available |
@@ -66,14 +66,14 @@ The CI workflow should fail when any of these are broken:
 - Expected RLS policy count and critical database triggers.
 - Behaviour tests for customer/provider isolation and matching rules using distinct database identities.
 
-The PostgreSQL job uses a small local Auth schema stub solely to validate migration syntax and database objects. Run 70 passed all 12 substantive execution steps. The PostgreSQL service applies the migration and checks that seven application tables have RLS enabled, 19 policies exist, and two critical triggers exist. It then creates distinct simulated users and checks customer request/report privacy, provider service-area/category visibility, offer insertion/decision permissions, and the accepted-offer state transition. It does **not** emulate the complete Supabase platform and does not replace live tests using real Supabase Auth sessions.
+The PostgreSQL job uses a small local Auth schema stub solely to validate migration syntax and database objects. Run 74 passed all 12 substantive execution steps. The PostgreSQL service applies the migration and checks that seven application tables have RLS enabled, 19 policies exist, and two critical triggers exist. It then creates distinct simulated users and checks customer request/report privacy, provider service-area/category visibility, offer insertion/decision permissions, and the accepted-offer state transition. It does **not** emulate the complete Supabase platform and does not replace live tests using real Supabase Auth sessions.
 
 ## Safety and credential handling
 
 - Never ask for or commit a service-role key, password, database password, private user record, government ID, or personal contact list.
 - Public Supabase URL and publishable key are environment variables; the service-role key is server-only and must never use a `NEXT_PUBLIC_` variable.
 - Leave the invite gate closed until an adult project owner has reviewed privacy, legal, trust/safety, moderation, and support requirements.
-- The latest verified run: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41288794371. The repository is currently public. Change its GitHub visibility to Private before placing confidential business information or non-public code/data in it. This ChatGPT GitHub connection does not currently expose a repository-visibility update action.
+- The latest verified run: https://github.com/aarondangenaldperez-ux/nearneed/actions/runs/41288976287. The repository is currently public. Change its GitHub visibility to Private before placing confidential business information or non-public code/data in it. This ChatGPT GitHub connection does not currently expose a repository-visibility update action.
 - Do not connect a real payment provider or collect customer/provider personal data until an adult project owner and qualified reviewer have handled applicable legal, privacy, and financial requirements.
 
 ## Resume prompt
