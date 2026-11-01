@@ -4,12 +4,12 @@ import { useMemo, useState } from "react";
 
 const categories = ["All", "Home services", "Tech help", "Learning", "Creative", "Events"];
 const services = [
-  { id: 1, category: "Home services", icon: "⌂", title: "Home repairs & maintenance", detail: "Find trusted local help for everyday fixes.", price: "Varies by request", tag: "Example category" },
-  { id: 2, category: "Tech help", icon: "⌘", title: "Computer & phone support", detail: "Get help setting up, fixing, or learning your devices.", price: "Ask for a quote", tag: "Example category" },
-  { id: 3, category: "Learning", icon: "✳", title: "Tutoring & lessons", detail: "Connect with people who can help you learn.", price: "Set by provider", tag: "Example category" },
-  { id: 4, category: "Creative", icon: "✎", title: "Design, photo & video", detail: "Find creative support for your next project.", price: "Ask for a quote", tag: "Example category" },
-  { id: 5, category: "Events", icon: "✺", title: "Events & celebrations", detail: "Discover local event services and suppliers.", price: "Varies by request", tag: "Example category" },
-  { id: 6, category: "Home services", icon: "♧", title: "Cleaning & home care", detail: "Find help for a cleaner, more comfortable space.", price: "Ask for a quote", tag: "Example category" },
+  { id: 1, category: "Home services", icon: "⌂", title: "Home repairs & maintenance", detail: "Common household maintenance and repair request examples.", price: "Pricing varies by provider", tag: "Example category" },
+  { id: 2, category: "Tech help", icon: "⌘", title: "Computer & phone support", detail: "Device setup, software guidance, and everyday tech questions.", price: "Quote-based pricing", tag: "Example category" },
+  { id: 3, category: "Learning", icon: "✳", title: "Tutoring & lessons", detail: "Tutoring, lessons, and practical skill-development examples.", price: "Provider-set pricing", tag: "Example category" },
+  { id: 4, category: "Creative", icon: "✎", title: "Design, photo & video", detail: "Design, photography, and video project examples.", price: "Ask for a quote", tag: "Example category" },
+  { id: 5, category: "Events", icon: "✺", title: "Events & celebrations", detail: "Planning, coordination, and event-supplier examples.", price: "Varies by request", tag: "Example category" },
+  { id: 6, category: "Home services", icon: "♧", title: "Cleaning & home care", detail: "Cleaning and household-care task examples.", price: "Ask for a quote", tag: "Example category" },
 ];
 
 export default function Home() {
