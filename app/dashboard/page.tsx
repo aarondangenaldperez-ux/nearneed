@@ -5,8 +5,10 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 type DashboardProps = {
-  searchParams: Promise<{ error?: string; message?: string }>;
+  searchParams: Promise<{ error?: string; message?: string; service?: string }>;
 };
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const notices: Record<string, string> = {
   "request-created": "Your request was published to eligible providers.",
@@ -38,6 +40,9 @@ function money(value: number | string | null): string {
 
 export default async function DashboardPage({ searchParams }: DashboardProps) {
   const params = await searchParams;
+  const requestedServiceId = typeof params.service === "string" && UUID_PATTERN.test(params.service)
+    ? params.service
+    : "";
 
   if (!isSupabaseConfigured()) {
     return (
@@ -56,7 +61,9 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
   const { data: { user }, error: userError } = await supabase.auth.getUser();
 
   if (userError || !user) {
-    redirect("/login?error=sign-in-required");
+    redirect(requestedServiceId
+      ? "/login?error=sign-in-required&service=" + encodeURIComponent(requestedServiceId)
+      : "/login?error=sign-in-required");
   }
 
   const [
@@ -64,17 +71,31 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
     ownRequestsResult,
     providerProfileResult,
     providerServicesResult,
+    selectedServiceResult,
   ] = await Promise.all([
     supabase.from("service_categories").select("id,name").eq("is_active", true).order("name"),
     supabase.from("need_requests").select("id,title,description,city,province,status,created_at,budget_min,budget_max,service_categories(name),quotes(id,status,message,price_amount,pricing_note,estimated_days,provider_profiles(public_name,business_name))").eq("customer_id", user.id).order("created_at", { ascending: false }),
     supabase.from("provider_profiles").select("public_name,business_name,about,city,province,is_published").eq("user_id", user.id).maybeSingle(),
     supabase.from("provider_services").select("id,title,description,city,province,is_active,service_categories(name)").eq("provider_id", user.id).order("created_at", { ascending: false }),
+    requestedServiceId
+      ? supabase.from("provider_services").select("id,provider_id,title,category_id,city,province").eq("id", requestedServiceId).eq("is_active", true).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
   ]);
 
   const categories = categoriesResult.data ?? [];
   const ownRequests = ownRequestsResult.data ?? [];
   const providerProfile = providerProfileResult.data;
   const providerServices = providerServicesResult.data ?? [];
+  const selectedServiceRow = selectedServiceResult.data;
+
+  const selectedProviderResult = selectedServiceRow
+    ? await supabase.from("provider_profiles").select("user_id").eq("user_id", selectedServiceRow.provider_id).eq("is_published", true).maybeSingle()
+    : null;
+  const selectedService = selectedServiceRow &&
+    selectedProviderResult?.data &&
+    categories.some((category) => category.id === selectedServiceRow.category_id)
+      ? selectedServiceRow
+      : null;
 
   const feedResult = providerProfile?.is_published
     ? await supabase.from("need_requests").select("id,title,description,city,province,budget_min,budget_max,created_at,service_categories(name)").eq("status", "open").neq("customer_id", user.id).order("created_at", { ascending: false }).limit(30)
@@ -99,15 +120,16 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
 
         <section className="dashboard-card">
           <div className="dashboard-section-heading"><div><span className="eyebrow">CUSTOMER</span><h2>Post a request</h2></div><p>Describe the task without sharing private contact details or an exact address.</p></div>
+          {selectedService ? <p className="provider-notice" role="status"><strong>Starting from: {selectedService.title}</strong> · {selectedService.city}, {selectedService.province}. Your request will be visible to eligible providers matching this category and area. It does not message, reserve, or guarantee work from the selected provider.</p> : requestedServiceId ? <p className="notice notice-error" role="alert">That service is no longer published or available. You can still create a general request.</p> : null}
           <form action={createRequest} className="dashboard-form">
             <label htmlFor="request-title">What do you need?</label>
-            <input id="request-title" name="title" minLength={8} maxLength={120} placeholder="e.g. Design a simple menu for a small café" required />
+            <input id="request-title" name="title" minLength={8} maxLength={120} defaultValue={selectedService ? ("Help with: " + selectedService.title).slice(0, 120) : ""} placeholder="e.g. Design a simple menu for a small café" required />
             <label htmlFor="request-description">Describe the task</label>
-            <textarea id="request-description" name="description" minLength={20} maxLength={2000} rows={4} placeholder="Include the work needed, useful context, and what a good result looks like. Do not include your phone number, precise address, IDs, or payment details." required />
+            <textarea id="request-description" name="description" minLength={20} maxLength={2000} rows={4} placeholder={selectedService ? "Describe the specific work you need and any important details. Do not include personal contact details or an exact address." : "Include the work needed, useful context, and what a good result looks like. Do not include your phone number, precise address, IDs, or payment details."} required />
             <div className="form-grid">
-              <div><label htmlFor="request-category">Category</label><select id="request-category" name="categoryId" defaultValue=""><option value="">Not sure yet</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></div>
-              <div><label htmlFor="request-city">City / municipality</label><input id="request-city" name="city" minLength={2} maxLength={100} required /></div>
-              <div><label htmlFor="request-province">Province / region</label><input id="request-province" name="province" minLength={2} maxLength={100} required /></div>
+              <div><label htmlFor="request-category">Category</label><select id="request-category" name="categoryId" defaultValue={selectedService?.category_id ?? ""}><option value="">Not sure yet</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></div>
+              <div><label htmlFor="request-city">City / municipality</label><input id="request-city" name="city" minLength={2} maxLength={100} defaultValue={selectedService?.city ?? ""} required /></div>
+              <div><label htmlFor="request-province">Province / region</label><input id="request-province" name="province" minLength={2} maxLength={100} defaultValue={selectedService?.province ?? ""} required /></div>
               <div><label htmlFor="request-budget-min">Minimum budget (PHP)</label><input id="request-budget-min" name="budgetMin" type="number" min="0" step="0.01" inputMode="decimal" /></div>
               <div><label htmlFor="request-budget-max">Maximum budget (PHP)</label><input id="request-budget-max" name="budgetMax" type="number" min="0" step="0.01" inputMode="decimal" /></div>
             </div>
