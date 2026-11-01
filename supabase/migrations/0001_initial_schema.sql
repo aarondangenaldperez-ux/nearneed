@@ -381,8 +381,17 @@ create policy "published provider can create quote"
       where pp.user_id = (select auth.uid()) and pp.is_published = true
     )
     and exists (
-      select 1 from public.need_requests nr
-      where nr.id = request_id and nr.status = 'open' and nr.customer_id <> (select auth.uid())
+      select 1
+      from public.need_requests nr
+      join public.provider_services ps
+        on ps.provider_id = (select auth.uid())
+       and ps.is_active = true
+       and lower(ps.city) = lower(nr.city)
+       and lower(ps.province) = lower(nr.province)
+       and (nr.category_id is null or ps.category_id = nr.category_id)
+      where nr.id = request_id
+        and nr.status = 'open'
+        and nr.customer_id <> (select auth.uid())
     )
   );
 
