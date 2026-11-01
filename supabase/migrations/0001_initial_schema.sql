@@ -9,11 +9,9 @@ exception when duplicate_object then null; end $$;
 
 do $$ begin
   create type public.request_status as enum ('open', 'matched', 'paused', 'completed', 'cancelled');
-exception when duplicate_object then null; end $;
+exception when duplicate_object then null; end $$;
 
-alter type public.request_status add value if not exists 'matched' after 'open';
-
-do $ begin
+do $$ begin
   create type public.quote_status as enum ('sent', 'accepted', 'declined', 'withdrawn');
 exception when duplicate_object then null; end $$;
 
@@ -105,8 +103,8 @@ create table if not exists public.reports (
   quote_id uuid references public.quotes(id) on delete set null,
   reason public.report_reason not null,
   details text check (details is null or char_length(details) <= 1500),
-  created_at timestamptz not null default now(),
-  );
+  created_at timestamptz not null default now()
+);
 
 create index if not exists provider_services_area_idx
   on public.provider_services (province, city, category_id)
@@ -189,7 +187,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 begin
   if new.status = 'accepted' and old.status = 'sent' then
     update public.need_requests
@@ -205,7 +203,7 @@ begin
 
   return new;
 end;
-$;
+$$;
 
 drop trigger if exists quotes_close_request_after_accept on public.quotes;
 create trigger quotes_close_request_after_accept
