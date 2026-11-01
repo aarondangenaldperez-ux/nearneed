@@ -124,7 +124,7 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
               <p>{request.description}</p>
               <div className="request-meta"><span>Budget: {money(request.budget_min)} – {money(request.budget_max)}</span><span>{request.quotes?.length ?? 0} offers</span></div>
               {request.quotes?.length > 0 && <div className="quote-list">{request.quotes.map((quote) => <div className="quote-item" key={quote.id}>
-                <div><strong>{quote.provider_profiles?.business_name || quote.provider_profiles?.public_name || "Local provider"}</strong><span className="status-chip">{quote.status}</span></div>
+                <div><strong>{quote.provider_profiles?.[0]?.business_name || quote.provider_profiles?.[0]?.public_name || "Local provider"}</strong><span className="status-chip">{quote.status}</span></div>
                 <p>{quote.message}</p>
                 <div className="request-meta"><span>{money(quote.price_amount)} {quote.pricing_note ? `· ${quote.pricing_note}` : ""}</span><span>{quote.estimated_days === null ? "Timing not stated" : `${quote.estimated_days} days estimate`}</span></div>
                 {request.status === "open" && quote.status === "sent" && <form action={decideQuote} className="inline-actions"><input type="hidden" name="quoteId" value={quote.id} /><button className="small-button" name="decision" value="accepted" type="submit">Accept offer</button><button className="small-button secondary" name="decision" value="declined" type="submit">Decline</button></form>}
@@ -172,7 +172,7 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
             {feed.map((request) => <article className="request-item" key={request.id}>
               <div className="request-item-head"><div><span className="eyebrow">{request.city}, {request.province}</span><h3>{request.title}</h3></div></div>
               <p>{request.description}</p>
-              <div className="request-meta"><span>Budget: {money(request.budget_min)} – {money(request.budget_max)}</span><span>{request.service_categories?.name ?? "Uncategorised"}</span></div>
+              <div className="request-meta"><span>Budget: {money(request.budget_min)} – {money(request.budget_max)}</span><span>{request.service_categories?.[0]?.name ?? "Uncategorised"}</span></div>
               <form action={submitQuote} className="dashboard-form quote-form">
                 <input type="hidden" name="requestId" value={request.id} />
                 <label htmlFor={`quote-message-${request.id}`}>Your offer</label><textarea id={`quote-message-${request.id}`} name="quoteMessage" minLength={20} maxLength={1500} rows={3} placeholder="Explain what you can deliver and any important limits." required />
