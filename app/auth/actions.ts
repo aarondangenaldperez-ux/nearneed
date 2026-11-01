@@ -74,19 +74,24 @@ export async function signUp(formData: FormData) {
 export async function signIn(formData: FormData) {
   const email = value(formData, "email", 254).toLowerCase();
   const password = rawValue(formData, "password", 128);
+  const requestedServiceId = value(formData, "serviceId", 36);
+  const serviceId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestedServiceId)
+    ? requestedServiceId
+    : "";
+  const continuation = serviceId ? "&service=" + encodeURIComponent(serviceId) : "";
 
   if (!emailLooksValid(email) || !password) {
-    redirect("/login?error=invalid-login");
+    redirect("/login?error=invalid-login" + continuation);
   }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    redirect("/login?error=login-failed");
+    redirect("/login?error=login-failed" + continuation);
   }
 
-  redirect("/dashboard");
+  redirect(serviceId ? "/dashboard?service=" + encodeURIComponent(serviceId) : "/dashboard");
 }
 
 export async function signOut() {
