@@ -301,8 +301,22 @@ create policy "customer and published providers can read requests"
     or (
       status = 'open'
       and exists (
-        select 1 from public.provider_profiles pp
-        where pp.user_id = (select auth.uid()) and pp.is_published = true
+        select 1
+        from public.provider_profiles pp
+        where pp.user_id = (select auth.uid())
+          and pp.is_published = true
+          and exists (
+            select 1
+            from public.provider_services ps
+            where ps.provider_id = pp.user_id
+              and ps.is_active = true
+              and lower(ps.city) = lower(need_requests.city)
+              and lower(ps.province) = lower(need_requests.province)
+              and (
+                need_requests.category_id is null
+                or ps.category_id = need_requests.category_id
+              )
+          )
       )
     )
   );
