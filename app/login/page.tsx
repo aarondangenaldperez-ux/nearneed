@@ -5,7 +5,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
 type LoginPageProps = {
-  searchParams: Promise<{ error?: string; message?: string }>;
+  searchParams: Promise<{ error?: string; message?: string; service?: string }>;
 };
 
 const messages: Record<string, string> = {
@@ -20,6 +20,10 @@ const messages: Record<string, string> = {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
+  const requestedServiceId = params.service ?? "";
+  const serviceId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestedServiceId)
+    ? requestedServiceId
+    : "";
 
   if (!isSupabaseConfigured()) {
     return (
@@ -41,7 +45,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const registrationOpen = Boolean(process.env.NEED_PILOT_INVITE_CODE);
 
   if (user) {
-    redirect("/dashboard");
+    redirect(serviceId ? "/dashboard?service=" + encodeURIComponent(serviceId) : "/dashboard");
   }
 
   return (
@@ -56,6 +60,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <div className="auth-columns">
           <form action={signIn} className="auth-form">
             <h2>Sign in</h2>
+            <input type="hidden" name="serviceId" value={serviceId} />
             <label htmlFor="signin-email">Email</label>
             <input id="signin-email" name="email" type="email" autoComplete="email" maxLength={254} required />
             <label htmlFor="signin-password">Password</label>
