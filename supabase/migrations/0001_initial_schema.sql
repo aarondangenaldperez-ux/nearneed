@@ -12,10 +12,12 @@ do $$ begin
 exception when duplicate_object then null; end $$;
 
 do $$ begin
-  create type public.request_status as enum ('open', 'paused', 'completed', 'cancelled');
-exception when duplicate_object then null; end $$;
+  create type public.request_status as enum ('open', 'matched', 'paused', 'completed', 'cancelled');
+exception when duplicate_object then null; end $;
 
-do $$ begin
+alter type public.request_status add value if not exists 'matched' after 'open';
+
+do $ begin
   create type public.quote_status as enum ('sent', 'accepted', 'declined', 'withdrawn');
 exception when duplicate_object then null; end $$;
 
@@ -187,6 +189,38 @@ for each row execute function public.set_updated_at();
 drop trigger if exists quotes_set_updated_at on public.quotes;
 create trigger quotes_set_updated_at before update on public.quotes
 for each row execute function public.set_updated_at();
+
+-- Once a customer accepts an offer, stop the request from receiving new offers
+-- and close every other outstanding offer for that request.
+create or replace function public.close_request_after_quote_accept()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  if new.status = 'accepted' and old.status = 'sent' then
+    update public.need_requests
+      set status = 'matched'
+      where id = new.request_id and status = 'open';
+
+    update public.quotes
+      set status = 'declined'
+      where request_id = new.request_id
+        and id <> new.id
+        and status = 'sent';
+  end if;
+
+  return new;
+end;
+$;
+
+drop trigger if exists quotes_close_request_after_accept on public.quotes;
+create trigger quotes_close_request_after_accept
+  after update of status on public.quotes
+  for each row
+  when (new.status = 'accepted' and old.status = 'sent')
+  execute function public.close_request_after_quote_accept();
 
 -- Example categories only. The final pilot categories should be chosen from interviews.
 insert into public.service_categories (slug, name, description)
